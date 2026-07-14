@@ -26,9 +26,9 @@ public class AppiumSetup
 			// Always iOS for iOS
 			PlatformName = "iOS",
 			// iOS Version
-			PlatformVersion = "17.0",
+			PlatformVersion = "18.5",
 			// Don't specify if you don't want a specific device
-			DeviceName = "iPhone 15 Pro",
+			DeviceName = "iPhone Xs",
 			// The full path to the .app file to test or the bundle id if the app is already installed on the device
 			App = "com.companyname.testsuite",
 		};
