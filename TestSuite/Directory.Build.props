@@ -1,0 +1,10 @@
+<Project>
+
+  <PropertyGroup>
+    <!-- Consolidate all bin/obj output for every project in this solution
+         into a single artifacts folder at the solution root. -->
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+  </PropertyGroup>
+
+</Project>

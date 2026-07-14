@@ -1,0 +1,16 @@
+## .NET
+artifacts/
+bin/
+obj/
+*.user
+*.suo
+
+## Visual Studio / Rider / VS Code
+.vs/
+.idea/
+*.userprefs
+.vscode/
+
+## OS
+.DS_Store
+Thumbs.db
