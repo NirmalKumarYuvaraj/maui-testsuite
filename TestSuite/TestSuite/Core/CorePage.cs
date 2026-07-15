@@ -227,8 +227,8 @@ public class CorePage : ContentPage
 
     void PerformNavigation(string? controlName)
     {
-        var pageType = Type.GetType($"TestSuite.Views.{controlName}.{controlName}ControlPage");
-        Navigation.PushAsync((Page)Activator.CreateInstance(pageType!)!);
+        var pageType = Type.GetType($"TestSuite.Views.{controlName}.{controlName}NavPage");
+        Application.Current!.Windows[0].Page = (Page)Activator.CreateInstance(pageType!)!;
     }
 }
 

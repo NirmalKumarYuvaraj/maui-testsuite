@@ -3,6 +3,16 @@ using TestSuite.ViewModels;
 
 namespace TestSuite.Views.ActivityIndicator;
 
+public class ActivityIndicatorNavPage : NavigationPage
+{
+    public ActivityIndicatorNavPage()
+    {
+        var activityIndicatorPage = new ActivityIndicatorControlPage();
+        PushAsync(activityIndicatorPage);
+    }
+}
+
+
 public class ActivityIndicatorControlPage : ContentPage
 {
     readonly ActivityIndicatorViewModel? _viewModel;
@@ -23,13 +33,17 @@ public class ActivityIndicatorControlPage : ContentPage
             Spacing = 10
         };
 
-
         layout.Children.Add(new Label
         {
             Text = "Activity Indicator Control",
             FontSize = 24,
             HorizontalOptions = LayoutOptions.Center
         });
+
+
+        var CustomSwitch = new Switch();
+        CustomSwitch.SetBinding(Switch.IsEnabledProperty, nameof(ActivityIndicatorViewModel.IsEnabled), BindingMode.TwoWay);
+        layout.Children.Add(CustomSwitch);
 
         Content = layout;
     }

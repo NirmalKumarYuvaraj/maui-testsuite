@@ -18,6 +18,7 @@ public class BaseViewPropertiesPage : ContentPage
     Button? NavigateToLayoutAndSizePropertiesPageButton;
     Button? NavigateToShadowOptionsPageButton;
     Button? NavigateToClipOptionsPageButton;
+    Button? MoreOptionsButton;
 
     Label? IsFocusedLabel;
     Label? DesiredSizeLabel;
@@ -140,6 +141,7 @@ public class BaseViewPropertiesPage : ContentPage
     public BaseViewPropertiesPage(BaseViewModel viewModel)
     {
         _viewModel = viewModel;
+        BindingContext = _viewModel;
         Title = "View Properties";
 
         CreateStyles();
@@ -245,7 +247,7 @@ public class BaseViewPropertiesPage : ContentPage
         });
 
         IsEnabledSwitch = new Switch();
-        IsEnabledSwitch.Toggled += OnIsEnabledToggled;
+        IsEnabledSwitch.SetBinding(Switch.IsToggledProperty, nameof(BaseViewModel.IsEnabled), BindingMode.TwoWay);
         behaviorLayout.Add(CreateEntryRow("Is Enabled", IsEnabledSwitch));
 
         InputTransparentSwitch = new Switch();
@@ -272,6 +274,11 @@ public class BaseViewPropertiesPage : ContentPage
         NavigateToClipOptionsPageButton = new Button { Text = "Clip Options" };
         NavigateToClipOptionsPageButton.Clicked += OnNavigateToClipOptionsPageClicked;
         layout.Add(NavigateToClipOptionsPageButton);
+
+        MoreOptionsButton = new Button { Text = "More Options" };
+        MoreOptionsButton.Clicked += OnMoreOptionsPageClicked;
+
+        layout.Add(MoreOptionsButton);
 
         layout.Add(new Label
         {
@@ -308,6 +315,11 @@ public class BaseViewPropertiesPage : ContentPage
     void OnNavigateToClipOptionsPageClicked(object? sender, EventArgs e)
     {
         Navigation.PushAsync(new ClipPropertiesPage());
+    }
+
+    void OnMoreOptionsPageClicked(object? sender, EventArgs e)
+    {
+        // future implementation for more options navigation
     }
 }
 
