@@ -25,34 +25,8 @@ public class BaseViewPropertiesPage : ContentPage
     Label? FrameLabel;
 
     Style? sectionHeaderStyle;
-    Style? propLabelStyle;
-    Style? valueLabelStyle;
 
     BaseViewModel? _viewModel;
-
-    Grid CreateEntryRow(string text, View view)
-    {
-        var grid = new Grid
-        {
-            ColumnSpacing = 8,
-            RowDefinitions =
-            {
-                new RowDefinition { Height = GridLength.Star },
-                new RowDefinition { Height = GridLength.Star }
-            }
-        };
-
-        grid.Add(new Label
-        {
-            Text = text,
-            Style = propLabelStyle
-        });
-
-        Grid.SetRow(view, 1);
-        grid.Add(view);
-
-        return grid;
-    }
 
     void CreateStyles()
     {
@@ -64,26 +38,6 @@ public class BaseViewPropertiesPage : ContentPage
                 new Setter { Property = Label.FontAttributesProperty, Value = FontAttributes.Bold },
                 new Setter { Property = Label.TextColorProperty, Value = Colors.White },
                 new Setter { Property = Label.BackgroundColorProperty, Value = Color.FromArgb("#444") },
-            }
-        };
-
-        propLabelStyle = new Style(typeof(Label))
-        {
-            Setters =
-            {
-                new Setter { Property = Label.FontSizeProperty, Value = 13d },
-                new Setter { Property = Label.VerticalOptionsProperty, Value = LayoutOptions.Center },
-                new Setter { Property = Label.TextColorProperty, Value = Color.FromArgb("#333") }
-            }
-        };
-
-        valueLabelStyle = new Style(typeof(Label))
-        {
-            Setters =
-            {
-                new Setter { Property = Label.FontSizeProperty, Value = 12d },
-                new Setter { Property = Label.TextColorProperty, Value = Color.FromArgb("#666") },
-                new Setter { Property = Label.VerticalOptionsProperty, Value = LayoutOptions.Center }
             }
         };
     }
@@ -195,15 +149,15 @@ public class BaseViewPropertiesPage : ContentPage
 
         HorizontalOptionsEntry = new Entry();
         HorizontalOptionsEntry.TextChanged += OnHorizontalOptionsChanged;
-        leftStack.Add(CreateEntryRow("Horizontal Options", HorizontalOptionsEntry));
+        leftStack.Add(PropertyPageHelpers.CreateStackedEntryRow("Horizontal Options", HorizontalOptionsEntry));
 
         VerticalOptionsEntry = new Entry();
         VerticalOptionsEntry.TextChanged += OnVerticalOptionsChanged;
-        leftStack.Add(CreateEntryRow("Vertical Options", VerticalOptionsEntry));
+        leftStack.Add(PropertyPageHelpers.CreateStackedEntryRow("Vertical Options", VerticalOptionsEntry));
 
         FlowDirectionEntry = new Entry();
         FlowDirectionEntry.TextChanged += OnFlowDirectionChanged;
-        leftStack.Add(CreateEntryRow("Flow Direction", FlowDirectionEntry));
+        leftStack.Add(PropertyPageHelpers.CreateStackedEntryRow("Flow Direction", FlowDirectionEntry));
 
         appearanceAndAlignmentGrid.Add(leftStack);
 
@@ -221,15 +175,15 @@ public class BaseViewPropertiesPage : ContentPage
 
         OpacityEntry = new Entry();
         OpacityEntry.TextChanged += OnOpacityChanged;
-        rightStack.Add(CreateEntryRow("Opacity", OpacityEntry));
+        rightStack.Add(PropertyPageHelpers.CreateStackedEntryRow("Opacity", OpacityEntry));
 
         VisibilityEntry = new Entry();
         VisibilityEntry.TextChanged += OnVisibilityChanged;
-        rightStack.Add(CreateEntryRow("Visibility", VisibilityEntry));
+        rightStack.Add(PropertyPageHelpers.CreateStackedEntryRow("Visibility", VisibilityEntry));
 
         BackgroundEntry = new Entry();
         BackgroundEntry.TextChanged += OnBackgroundChanged;
-        rightStack.Add(CreateEntryRow("Background", BackgroundEntry));
+        rightStack.Add(PropertyPageHelpers.CreateStackedEntryRow("Background", BackgroundEntry));
 
         appearanceAndAlignmentGrid.Add(rightStack, 1, 0);
 
@@ -248,11 +202,11 @@ public class BaseViewPropertiesPage : ContentPage
 
         IsEnabledSwitch = new Switch();
         IsEnabledSwitch.SetBinding(Switch.IsToggledProperty, nameof(BaseViewModel.IsEnabled), BindingMode.TwoWay);
-        behaviorLayout.Add(CreateEntryRow("Is Enabled", IsEnabledSwitch));
+        behaviorLayout.Add(PropertyPageHelpers.CreateStackedEntryRow("Is Enabled", IsEnabledSwitch));
 
         InputTransparentSwitch = new Switch();
         InputTransparentSwitch.Toggled += OnInputTransparentToggled;
-        behaviorLayout.Add(CreateEntryRow("Input Transparent", InputTransparentSwitch));
+        behaviorLayout.Add(PropertyPageHelpers.CreateStackedEntryRow("Input Transparent", InputTransparentSwitch));
 
         layout.Add(behaviorLayout);
 
@@ -265,7 +219,7 @@ public class BaseViewPropertiesPage : ContentPage
 
         ZIndexEntry = new Entry();
         ZIndexEntry.TextChanged += OnZIndexChanged;
-        layout.Add(CreateEntryRow("ZIndex", ZIndexEntry));
+        layout.Add(PropertyPageHelpers.CreateStackedEntryRow("ZIndex", ZIndexEntry));
 
         NavigateToShadowOptionsPageButton = new Button { Text = "Shadow Options" };
         NavigateToShadowOptionsPageButton.Clicked += OnNavigateToShadowOptionsPageClicked;
@@ -287,14 +241,14 @@ public class BaseViewPropertiesPage : ContentPage
             Margin = new Thickness(0, 8, 0, 0)
         });
 
-        IsFocusedLabel = new Label { Style = valueLabelStyle };
-        layout.Add(CreateEntryRow("Is Focused", IsFocusedLabel));
+        IsFocusedLabel = new Label { Style = SharedStyles.ValueLabelStyle };
+        layout.Add(PropertyPageHelpers.CreateStackedEntryRow("Is Focused", IsFocusedLabel));
 
-        DesiredSizeLabel = new Label { Style = valueLabelStyle };
-        layout.Add(CreateEntryRow("Desired Size", DesiredSizeLabel));
+        DesiredSizeLabel = new Label { Style = SharedStyles.ValueLabelStyle };
+        layout.Add(PropertyPageHelpers.CreateStackedEntryRow("Desired Size", DesiredSizeLabel));
 
-        FrameLabel = new Label { Style = valueLabelStyle };
-        layout.Add(CreateEntryRow("Frame", FrameLabel));
+        FrameLabel = new Label { Style = SharedStyles.ValueLabelStyle };
+        layout.Add(PropertyPageHelpers.CreateStackedEntryRow("Frame", FrameLabel));
 
         Content = new ScrollView
         {
@@ -323,157 +277,16 @@ public class BaseViewPropertiesPage : ContentPage
     }
 }
 
-public class LayoutAndSizePropertiesPage : ContentPage
-{
-    Entry? WidthEntry;
-    Entry? HeightEntry;
-    Entry? MinWidthEntry;
-    Entry? MaxWidthEntry;
-    Entry? MinHeightEntry;
-    Entry? MaxHeightEntry;
-    Entry? MarginEntry;
-
-    Style? propLabelStyle;
-
-    BaseViewModel? _viewModel;
-
-    public LayoutAndSizePropertiesPage(BaseViewModel? viewModel)
-    {
-        _viewModel = viewModel;
-        Title = "Layout & Size Properties";
-        CreateStyles();
-
-        ToolbarItems.Add(new ToolbarItem
-        {
-            Text = "Apply",
-            Command = new Command(async () =>
-            {
-                await Navigation.PopToRootAsync();
-            })
-        });
-
-        var layout = new VerticalStackLayout
-        {
-            Spacing = 0,
-            Padding = new Thickness(0, 0, 0, 24)
-        };
-
-        WidthEntry = new Entry();
-        WidthEntry.TextChanged += OnWidthChanged;
-        layout.Add(CreateEntryRow("Width", WidthEntry));
-
-        HeightEntry = new Entry();
-        HeightEntry.TextChanged += OnHeightChanged;
-        layout.Add(CreateEntryRow("Height", HeightEntry));
-
-        MinWidthEntry = new Entry();
-        MinWidthEntry.TextChanged += OnMinWidthChanged;
-        layout.Add(CreateEntryRow("Minimum Width", MinWidthEntry));
-
-        MaxWidthEntry = new Entry();
-        MaxWidthEntry.TextChanged += OnMaxWidthChanged;
-        layout.Add(CreateEntryRow("Maximum Width", MaxWidthEntry));
-
-        MinHeightEntry = new Entry();
-        MinHeightEntry.TextChanged += OnMinHeightChanged;
-        layout.Add(CreateEntryRow("Minimum Height", MinHeightEntry));
-
-        MaxHeightEntry = new Entry();
-        MaxHeightEntry.TextChanged += OnMaxHeightChanged;
-        layout.Add(CreateEntryRow("Maximum Height", MaxHeightEntry));
-
-        MarginEntry = new Entry { Text = "0" };
-        MarginEntry.TextChanged += OnMarginChanged;
-        layout.Add(CreateEntryRow("Margin", MarginEntry));
-
-        Content = new ScrollView
-        {
-            Content = layout
-        };
-    }
-
-    Grid CreateEntryRow(string text, View view)
-    {
-        var grid = new Grid
-        {
-            ColumnSpacing = 8,
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = 160 },
-                new ColumnDefinition { Width = GridLength.Star }
-            }
-        };
-
-        grid.Add(new Label
-        {
-            Text = text,
-            Style = propLabelStyle
-        });
-
-        Grid.SetColumn(view, 1);
-        grid.Add(view);
-
-        return grid;
-    }
-
-    void CreateStyles()
-    {
-        propLabelStyle = new Style(typeof(Label))
-        {
-            Setters =
-            {
-                new Setter { Property = Label.FontSizeProperty, Value = 13d },
-                new Setter { Property = Label.VerticalOptionsProperty, Value = LayoutOptions.Center },
-                new Setter { Property = Label.TextColorProperty, Value = Color.FromArgb("#333") }
-            }
-        };
-    }
-
-    void OnWidthChanged(object? sender, TextChangedEventArgs e)
-    {
-        double v = Math.Round(double.Parse(e.NewTextValue));
-    }
-
-    void OnHeightChanged(object? sender, TextChangedEventArgs e)
-    {
-        double v = Math.Round(double.Parse(e.NewTextValue));
-    }
-
-    void OnMinWidthChanged(object? sender, TextChangedEventArgs e)
-    {
-        double v = Math.Round(double.Parse(e.NewTextValue));
-    }
-
-    void OnMaxWidthChanged(object? sender, TextChangedEventArgs e)
-    {
-        double v = Math.Round(double.Parse(e.NewTextValue));
-    }
-
-    void OnMinHeightChanged(object? sender, TextChangedEventArgs e)
-    {
-        double v = Math.Round(double.Parse(e.NewTextValue));
-    }
-
-    void OnMaxHeightChanged(object? sender, TextChangedEventArgs e)
-    {
-        double v = Math.Round(double.Parse(e.NewTextValue));
-    }
-
-    void OnMarginChanged(object? sender, TextChangedEventArgs e)
-    {
-        // Needs to implement
-    }
-}
-
-/* New Specifications for the MainPage.xaml.cs:
-1.Need to change all the pickers to Entry
-2. Need to change all the sliders to Entry
-3. Need to add Const string for all the values (layout options, flow direction, visibility)
-4. Background should be entry that supports both const colors and hex values
-5. Need to create a new page for the shadow and clip properties with all the properties exposed as entry fields.
-6. should make the page non scrollable.
-7. Need to add a button to reset all the values to default.
-8. Need to show the options in a different page with a list of all the properties and their current values.
-9. so the flow is mainpage has the Test control and a toolbar item to navigate to the options page. The options page has a list of all the properties of that specific controls (example : Mainpage ->  Label , Options Page - has label specific properties, More options button at the end to navigate to additional settings) and their current values. Clicking on an interface-based naming navigates to a new page where the user can change the value of that property.
-10. Make everything c# only. no xaml
-*/
+// NOTE (backlog / not yet implemented):
+// 1. Change all pickers to Entry.
+// 2. Change all sliders to Entry.
+// 3. Add const strings for enum-like values (layout options, flow direction, visibility).
+// 4. Background entry should support both named colors and hex values.
+// 5. Expose all Shadow/Clip properties as entry fields.
+// 6. Make the page non scrollable.
+// 7. Add a "reset to default" button.
+// 8. Show options in a dedicated page listing all properties and current values;
+//    tapping a property navigates to a page to edit that value.
+// 9. Flow: main page shows the control + toolbar "Options" button -> options page
+//    lists that control's properties (+ "More options" for additional/base settings).
+// 10. Keep everything C# only, no XAML.
