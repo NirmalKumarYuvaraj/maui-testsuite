@@ -1,7 +1,7 @@
 using System;
 using TestSuite.ViewModels;
 
-namespace TestSuite.Views.ActivityIndicator;
+namespace TestSuite.Views;
 
 public class ActivityIndicatorNavPage : NavigationPage
 {

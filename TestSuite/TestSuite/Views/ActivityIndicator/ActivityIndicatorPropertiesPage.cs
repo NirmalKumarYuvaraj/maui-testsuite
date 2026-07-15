@@ -2,7 +2,7 @@ using System;
 using TestSuite.ViewModels;
 using TestSuite.Views.Base;
 
-namespace TestSuite.Views.ActivityIndicator;
+namespace TestSuite.Views;
 
 public class ActivityIndicatorPropertiesPage : ContentPage
 {

@@ -1,5 +1,5 @@
 using System.Collections.ObjectModel;
-using TestSuite.Views.ActivityIndicator;
+using TestSuite.Views;
 
 namespace TestSuite.Core;
 
@@ -229,6 +229,7 @@ public class CorePage : ContentPage
     static readonly Dictionary<string, Func<Page>> _navPageFactories = new()
     {
         ["ActivityIndicator"] = () => new ActivityIndicatorNavPage(),
+        ["Switch"] = () => new SwitchNavPage(),
     };
 
     void PerformNavigation(string? controlName)
