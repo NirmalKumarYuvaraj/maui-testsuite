@@ -227,8 +227,8 @@ public class CorePage : ContentPage
 
     void PerformNavigation(string? controlName)
     {
-        // Implement navigation logic here based on the selected control name
-
+        var pageType = Type.GetType($"TestSuite.Views.{controlName}.{controlName}ControlPage");
+        Navigation.PushAsync((Page)Activator.CreateInstance(pageType!)!);
     }
 }
 

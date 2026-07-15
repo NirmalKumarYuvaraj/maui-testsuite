@@ -4,7 +4,7 @@ namespace TestSuite.Views.Base;
 
 public class ShadowPropertiesPage : ContentPage
 {
-    Entry? ShadowColorEntry;
+    Entry? ShadowBrushEntry;
     Entry? ShadowOffsetXEntry;
     Entry? ShadowOffsetYEntry;
     Entry? ShadowOpacityEntry;
@@ -20,8 +20,8 @@ public class ShadowPropertiesPage : ContentPage
             Padding = new Thickness(0, 0, 0, 24)
         };
 
-        ShadowColorEntry = new Entry();
-        layout.Add(CreateEntryRow("Shadow Color", ShadowColorEntry));
+        ShadowBrushEntry = new Entry();
+        layout.Add(CreateEntryRow("Shadow Brush", ShadowBrushEntry));
 
         ShadowOffsetXEntry = new Entry();
         layout.Add(CreateEntryRow("Shadow Offset X", ShadowOffsetXEntry));

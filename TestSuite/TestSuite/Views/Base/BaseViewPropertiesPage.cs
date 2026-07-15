@@ -26,7 +26,6 @@ public class BaseViewPropertiesPage : ContentPage
     Style? sectionHeaderStyle;
     Style? propLabelStyle;
     Style? valueLabelStyle;
-    Style? propRowStyle;
 
     BaseViewModel? _viewModel;
 
@@ -34,14 +33,12 @@ public class BaseViewPropertiesPage : ContentPage
     {
         var grid = new Grid
         {
-            Padding = new Thickness(8, 4),
-            Style = propRowStyle,
             ColumnSpacing = 8,
-            ColumnDefinitions =
-   {
-    new ColumnDefinition { Width = 160 },
-    new ColumnDefinition { Width = GridLength.Star }
-   }
+            RowDefinitions =
+            {
+                new RowDefinition { Height = GridLength.Star },
+                new RowDefinition { Height = GridLength.Star }
+            }
         };
 
         grid.Add(new Label
@@ -50,7 +47,7 @@ public class BaseViewPropertiesPage : ContentPage
             Style = propLabelStyle
         });
 
-        Grid.SetColumn(view, 1);
+        Grid.SetRow(view, 1);
         grid.Add(view);
 
         return grid;
@@ -66,37 +63,27 @@ public class BaseViewPropertiesPage : ContentPage
                 new Setter { Property = Label.FontAttributesProperty, Value = FontAttributes.Bold },
                 new Setter { Property = Label.TextColorProperty, Value = Colors.White },
                 new Setter { Property = Label.BackgroundColorProperty, Value = Color.FromArgb("#444") },
-                new Setter { Property = Label.PaddingProperty, Value = new Thickness(8,4) }
             }
         };
 
         propLabelStyle = new Style(typeof(Label))
         {
             Setters =
-   {
-    new Setter { Property = Label.FontSizeProperty, Value = 13d },
-    new Setter { Property = Label.VerticalOptionsProperty, Value = LayoutOptions.Center },
-    new Setter { Property = Label.TextColorProperty, Value = Color.FromArgb("#333") }
-   }
+            {
+                new Setter { Property = Label.FontSizeProperty, Value = 13d },
+                new Setter { Property = Label.VerticalOptionsProperty, Value = LayoutOptions.Center },
+                new Setter { Property = Label.TextColorProperty, Value = Color.FromArgb("#333") }
+            }
         };
 
         valueLabelStyle = new Style(typeof(Label))
         {
             Setters =
-   {
-    new Setter { Property = Label.FontSizeProperty, Value = 12d },
-    new Setter { Property = Label.TextColorProperty, Value = Color.FromArgb("#666") },
-    new Setter { Property = Label.VerticalOptionsProperty, Value = LayoutOptions.Center }
-   }
-        };
-
-        propRowStyle = new Style(typeof(Grid))
-        {
-            Setters =
-   {
-    new Setter { Property = Grid.BackgroundColorProperty, Value = Color.FromArgb("#EEE") },
-    new Setter { Property = Grid.PaddingProperty, Value = new Thickness(8, 4) }
-   }
+            {
+                new Setter { Property = Label.FontSizeProperty, Value = 12d },
+                new Setter { Property = Label.TextColorProperty, Value = Color.FromArgb("#666") },
+                new Setter { Property = Label.VerticalOptionsProperty, Value = LayoutOptions.Center }
+            }
         };
     }
 
@@ -153,7 +140,7 @@ public class BaseViewPropertiesPage : ContentPage
     public BaseViewPropertiesPage(BaseViewModel viewModel)
     {
         _viewModel = viewModel;
-        Title = "IView Feature Matrix";
+        Title = "View Properties";
 
         CreateStyles();
 
@@ -168,8 +155,7 @@ public class BaseViewPropertiesPage : ContentPage
 
         var layout = new VerticalStackLayout
         {
-            Spacing = 0,
-            Padding = new Thickness(0, 0, 0, 24)
+            Spacing = 5,
         };
 
         layout.Add(new Label
@@ -183,8 +169,22 @@ public class BaseViewPropertiesPage : ContentPage
         NavigateToLayoutAndSizePropertiesPageButton.Clicked += OnNavigateToLayoutAndSizePropertiesPageClicked;
         layout.Add(NavigateToLayoutAndSizePropertiesPageButton);
 
+        Grid appearanceAndAlignmentGrid = new Grid
+        {
+            ColumnSpacing = 5,
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = GridLength.Star },
+                new ColumnDefinition { Width = GridLength.Star }
+            }
+        };
 
-        layout.Add(new Label
+        var leftStack = new VerticalStackLayout
+        {
+            Spacing = 0
+        };
+
+        leftStack.Add(new Label
         {
             Text = "ALIGNMENT",
             Style = sectionHeaderStyle,
@@ -193,17 +193,24 @@ public class BaseViewPropertiesPage : ContentPage
 
         HorizontalOptionsEntry = new Entry();
         HorizontalOptionsEntry.TextChanged += OnHorizontalOptionsChanged;
-        layout.Add(CreateEntryRow("Horizontal Alignment", HorizontalOptionsEntry));
+        leftStack.Add(CreateEntryRow("Horizontal Options", HorizontalOptionsEntry));
 
         VerticalOptionsEntry = new Entry();
         VerticalOptionsEntry.TextChanged += OnVerticalOptionsChanged;
-        layout.Add(CreateEntryRow("Vertical Alignment", VerticalOptionsEntry));
+        leftStack.Add(CreateEntryRow("Vertical Options", VerticalOptionsEntry));
 
         FlowDirectionEntry = new Entry();
         FlowDirectionEntry.TextChanged += OnFlowDirectionChanged;
-        layout.Add(CreateEntryRow("Flow Direction", FlowDirectionEntry));
+        leftStack.Add(CreateEntryRow("Flow Direction", FlowDirectionEntry));
 
-        layout.Add(new Label
+        appearanceAndAlignmentGrid.Add(leftStack);
+
+        var rightStack = new VerticalStackLayout
+        {
+            Spacing = 0
+        };
+
+        rightStack.Add(new Label
         {
             Text = "APPEARANCE",
             Style = sectionHeaderStyle,
@@ -212,16 +219,24 @@ public class BaseViewPropertiesPage : ContentPage
 
         OpacityEntry = new Entry();
         OpacityEntry.TextChanged += OnOpacityChanged;
-        layout.Add(CreateEntryRow("Opacity", OpacityEntry));
+        rightStack.Add(CreateEntryRow("Opacity", OpacityEntry));
 
         VisibilityEntry = new Entry();
         VisibilityEntry.TextChanged += OnVisibilityChanged;
-        layout.Add(CreateEntryRow("Visibility", VisibilityEntry));
+        rightStack.Add(CreateEntryRow("Visibility", VisibilityEntry));
 
         BackgroundEntry = new Entry();
         BackgroundEntry.TextChanged += OnBackgroundChanged;
-        layout.Add(CreateEntryRow("Background", BackgroundEntry));
+        rightStack.Add(CreateEntryRow("Background", BackgroundEntry));
 
+        appearanceAndAlignmentGrid.Add(rightStack, 1, 0);
+
+        layout.Add(appearanceAndAlignmentGrid);
+
+        HorizontalStackLayout behaviorLayout = new HorizontalStackLayout
+        {
+            Spacing = 5
+        };
         layout.Add(new Label
         {
             Text = "BEHAVIOR",
@@ -231,11 +246,13 @@ public class BaseViewPropertiesPage : ContentPage
 
         IsEnabledSwitch = new Switch();
         IsEnabledSwitch.Toggled += OnIsEnabledToggled;
-        layout.Add(CreateEntryRow("Is Enabled", IsEnabledSwitch));
+        behaviorLayout.Add(CreateEntryRow("Is Enabled", IsEnabledSwitch));
 
         InputTransparentSwitch = new Switch();
         InputTransparentSwitch.Toggled += OnInputTransparentToggled;
-        layout.Add(CreateEntryRow("Input Transparent", InputTransparentSwitch));
+        behaviorLayout.Add(CreateEntryRow("Input Transparent", InputTransparentSwitch));
+
+        layout.Add(behaviorLayout);
 
         layout.Add(new Label
         {
@@ -294,7 +311,6 @@ public class BaseViewPropertiesPage : ContentPage
     }
 }
 
-
 public class LayoutAndSizePropertiesPage : ContentPage
 {
     Entry? WidthEntry;
@@ -306,7 +322,6 @@ public class LayoutAndSizePropertiesPage : ContentPage
     Entry? MarginEntry;
 
     Style? propLabelStyle;
-    Style? propRowStyle;
 
     BaseViewModel? _viewModel;
 
@@ -369,14 +384,12 @@ public class LayoutAndSizePropertiesPage : ContentPage
     {
         var grid = new Grid
         {
-            Padding = new Thickness(8, 4),
-            Style = propRowStyle,
             ColumnSpacing = 8,
             ColumnDefinitions =
-   {
-    new ColumnDefinition { Width = 160 },
-    new ColumnDefinition { Width = GridLength.Star }
-   }
+            {
+                new ColumnDefinition { Width = 160 },
+                new ColumnDefinition { Width = GridLength.Star }
+            }
         };
 
         grid.Add(new Label
@@ -393,27 +406,16 @@ public class LayoutAndSizePropertiesPage : ContentPage
 
     void CreateStyles()
     {
-
         propLabelStyle = new Style(typeof(Label))
         {
             Setters =
-   {
-    new Setter { Property = Label.FontSizeProperty, Value = 13d },
-    new Setter { Property = Label.VerticalOptionsProperty, Value = LayoutOptions.Center },
-    new Setter { Property = Label.TextColorProperty, Value = Color.FromArgb("#333") }
-   }
-        };
-
-        propRowStyle = new Style(typeof(Grid))
-        {
-            Setters =
-   {
-    new Setter { Property = Grid.BackgroundColorProperty, Value = Color.FromArgb("#EEE") },
-    new Setter { Property = Grid.PaddingProperty, Value = new Thickness(8, 4) }
-   }
+            {
+                new Setter { Property = Label.FontSizeProperty, Value = 13d },
+                new Setter { Property = Label.VerticalOptionsProperty, Value = LayoutOptions.Center },
+                new Setter { Property = Label.TextColorProperty, Value = Color.FromArgb("#333") }
+            }
         };
     }
-
 
     void OnWidthChanged(object? sender, TextChangedEventArgs e)
     {
