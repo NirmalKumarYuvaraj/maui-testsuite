@@ -1,6 +1,7 @@
 using System;
+using TestSuite.ViewModels.Base;
 
-namespace TestSuite.Test.Base;
+namespace TestSuite.Views.Base;
 
 public class BaseViewPropertiesPage : ContentPage
 {
@@ -60,13 +61,13 @@ public class BaseViewPropertiesPage : ContentPage
         sectionHeaderStyle = new Style(typeof(Label))
         {
             Setters =
-   {
-    new Setter { Property = Label.FontSizeProperty, Value = 13d },
-    new Setter { Property = Label.FontAttributesProperty, Value = FontAttributes.Bold },
-    new Setter { Property = Label.TextColorProperty, Value = Colors.White },
-    new Setter { Property = Label.BackgroundColorProperty, Value = Color.FromArgb("#444") },
-    new Setter { Property = Label.PaddingProperty, Value = new Thickness(8,4) }
-   }
+            {
+                new Setter { Property = Label.FontSizeProperty, Value = 13d },
+                new Setter { Property = Label.FontAttributesProperty, Value = FontAttributes.Bold },
+                new Setter { Property = Label.TextColorProperty, Value = Colors.White },
+                new Setter { Property = Label.BackgroundColorProperty, Value = Color.FromArgb("#444") },
+                new Setter { Property = Label.PaddingProperty, Value = new Thickness(8,4) }
+            }
         };
 
         propLabelStyle = new Style(typeof(Label))
@@ -102,13 +103,11 @@ public class BaseViewPropertiesPage : ContentPage
     void OnHorizontalOptionsChanged(object? sender, EventArgs e)
     {
         // Needs to implement
-        _viewModel?.HorizontalOptions = LayoutOptions.Center; // Placeholder, implement parsing logic
     }
 
     void OnVerticalOptionsChanged(object? sender, EventArgs e)
     {
         // Needs to implement
-        _viewModel?.VerticalOptions = LayoutOptions.Center; // Placeholder, implement parsing logic
     }
 
     void OnFlowDirectionChanged(object? sender, EventArgs e)
@@ -356,7 +355,7 @@ public class LayoutAndSizePropertiesPage : ContentPage
         MaxHeightEntry.TextChanged += OnMaxHeightChanged;
         layout.Add(CreateEntryRow("Maximum Height", MaxHeightEntry));
 
-        MarginEntry = new Entry { Text = viewModel?.Margin.ToString() ?? "0" };
+        MarginEntry = new Entry { Text = "0" };
         MarginEntry.TextChanged += OnMarginChanged;
         layout.Add(CreateEntryRow("Margin", MarginEntry));
 
@@ -419,13 +418,11 @@ public class LayoutAndSizePropertiesPage : ContentPage
     void OnWidthChanged(object? sender, TextChangedEventArgs e)
     {
         double v = Math.Round(double.Parse(e.NewTextValue));
-        _viewModel?.Width = v;
     }
 
     void OnHeightChanged(object? sender, TextChangedEventArgs e)
     {
         double v = Math.Round(double.Parse(e.NewTextValue));
-        _viewModel?.Height = v;
     }
 
     void OnMinWidthChanged(object? sender, TextChangedEventArgs e)
@@ -450,14 +447,7 @@ public class LayoutAndSizePropertiesPage : ContentPage
 
     void OnMarginChanged(object? sender, TextChangedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(e.NewTextValue))
-            return;
-
-        if (!double.TryParse(e.NewTextValue, out double v))
-            return;
-
-        v = Math.Round(v);
-        _viewModel?.Margin = v;
+        // Needs to implement
     }
 }
 

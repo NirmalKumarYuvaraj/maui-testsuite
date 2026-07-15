@@ -1,6 +1,6 @@
 using System;
 
-namespace TestSuite.Test.Base;
+namespace TestSuite.Views.Base;
 
 public class ShadowPropertiesPage : ContentPage
 {
