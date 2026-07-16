@@ -24,4 +24,13 @@
 	<Compile Include="..\TestSuite\AutomationIds\**\*.cs" LinkBase="AutomationIds" Visible="false" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Committed visual-regression baselines; copied to the output directory
+         so ScreenshotManager (which resolves paths relative to the test run's
+         working directory) can find them at runtime. -->
+    <Content Include="Screenshots\Baseline\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
