@@ -12,44 +12,24 @@ public class BaseViewModel : INotifyPropertyChanged
     LayoutOptions verticalOptions;
     FlowDirection flowDirection;
 
-    string horizontalOptionsText;
-    string verticalOptionsText;
-    string flowDirectionText;
-
     public LayoutOptions HorizontalOptions
     {
         get => horizontalOptions;
-        set { if (horizontalOptions != value) { horizontalOptions = value; OnPropertyChanged(); OnPropertyChanged(nameof(HorizontalOptionsText)); } }
+        set { if (horizontalOptions != value) { horizontalOptions = value; OnPropertyChanged(); } }
     }
 
     public LayoutOptions VerticalOptions
     {
         get => verticalOptions;
-        set { if (verticalOptions != value) { verticalOptions = value; OnPropertyChanged(); OnPropertyChanged(nameof(VerticalOptionsText)); } }
+        set { if (verticalOptions != value) { verticalOptions = value; OnPropertyChanged(); } }
     }
 
     public FlowDirection FlowDirection
     {
         get => flowDirection;
-        set { if (flowDirection != value) { flowDirection = value; OnPropertyChanged(); OnPropertyChanged(nameof(FlowDirectionText)); } }
+        set { if (flowDirection != value) { flowDirection = value; OnPropertyChanged(); } }
     }
 
-    public string HorizontalOptionsText
-    {
-        get => horizontalOptionsText;
-        set { if (horizontalOptionsText != value) { horizontalOptionsText = value; OnPropertyChanged(); } }
-    }
-
-    public string VerticalOptionsText
-    {
-        get => verticalOptionsText;
-        set { if (verticalOptionsText != value) { verticalOptionsText = value; OnPropertyChanged(); } }
-    }
-    public string FlowDirectionText
-    {
-        get => flowDirectionText;
-        set { if (flowDirectionText != value) { flowDirectionText = value; OnPropertyChanged(); } }
-    }
 
     // ── Appearance ───────────────────────────────────────────────────────────
     double opacity;
@@ -249,11 +229,8 @@ public class BaseViewModel : INotifyPropertyChanged
     public BaseViewModel(View testView)
     {
         horizontalOptions = testView.HorizontalOptions;
-        horizontalOptionsText = PropertyTypeResolver.FromLayoutOptions(horizontalOptions); ;
         verticalOptions = testView.VerticalOptions;
-        verticalOptionsText = PropertyTypeResolver.FromLayoutOptions(verticalOptions);
         flowDirection = testView.FlowDirection;
-        flowDirectionText = PropertyTypeResolver.FromFlowDirection(flowDirection);
 
         opacity = testView.Opacity;
         isVisible = testView.IsVisible;
@@ -284,7 +261,6 @@ public class BaseViewModel : INotifyPropertyChanged
         scaleY = testView.ScaleY;
         anchorX = testView.AnchorX;
         anchorY = testView.AnchorY;
-
         isFocused = testView.IsFocused;
     }
 

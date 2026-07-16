@@ -1,4 +1,3 @@
-
 using TestSuite.Helper;
 using TestSuite.ViewModels.Base;
 
@@ -6,97 +5,18 @@ namespace TestSuite.Views.Base;
 
 public class BaseViewPropertiesPage : ContentPage
 {
-    readonly Entry? HorizontalOptionsEntry;
-    readonly Entry? VerticalOptionsEntry;
-    readonly Entry? FlowDirectionEntry;
-    readonly Entry? OpacityEntry;
-    readonly Entry? VisibilityEntry;
-    readonly Entry? BackgroundEntry;
-    readonly Switch? IsEnabledSwitch;
-    readonly Switch? InputTransparentSwitch;
-    readonly Entry? ZIndexEntry;
-
-    readonly Button? NavigateToLayoutAndSizePropertiesPageButton;
-    readonly Button? NavigateToShadowOptionsPageButton;
-    readonly Button? NavigateToClipOptionsPageButton;
-    readonly Button? MoreOptionsButton;
-
-    readonly Label? IsFocusedLabel;
-    readonly Label? DesiredSizeLabel;
-    readonly Label? FrameLabel;
-
-    Style? sectionHeaderStyle;
-
     readonly BaseViewModel? _viewModel;
 
-    void CreateStyles()
+    static readonly Style SectionHeaderStyle = new(typeof(Label))
     {
-        sectionHeaderStyle = new Style(typeof(Label))
+        Setters =
         {
-            Setters =
-            {
-                new Setter { Property = Label.FontSizeProperty, Value = 13d },
-                new Setter { Property = Label.FontAttributesProperty, Value = FontAttributes.Bold },
-                new Setter { Property = Label.TextColorProperty, Value = Colors.White },
-                new Setter { Property = Label.BackgroundColorProperty, Value = Color.FromArgb("#444") },
-            }
-        };
-    }
-
-    void OnHorizontalOptionsChanged(object? sender, TextChangedEventArgs e)
-    {
-        var newText = e.NewTextValue;
-        if (string.IsNullOrWhiteSpace(newText))
-        {
-            return;
+            new Setter { Property = Label.FontSizeProperty, Value = 13d },
+            new Setter { Property = Label.FontAttributesProperty, Value = FontAttributes.Bold },
+            new Setter { Property = Label.TextColorProperty, Value = Colors.White },
+            new Setter { Property = Label.BackgroundColorProperty, Value = Color.FromArgb("#444") },
         }
-        _viewModel?.HorizontalOptions = PropertyTypeResolver.ToLayoutOptions(newText);
-    }
-
-    void OnVerticalOptionsChanged(object? sender, TextChangedEventArgs e)
-    {
-        var newText = e.NewTextValue;
-        if (string.IsNullOrWhiteSpace(newText))
-        {
-            return;
-        }
-        _viewModel?.VerticalOptions = PropertyTypeResolver.ToLayoutOptions(newText);
-    }
-
-    void OnFlowDirectionChanged(object? sender, TextChangedEventArgs e)
-    {
-        var newText = e.NewTextValue;
-        if (string.IsNullOrWhiteSpace(newText))
-        {
-            return;
-        }
-        _viewModel?.FlowDirection = PropertyTypeResolver.ToFlowDirection(newText);
-    }
-
-    void OnOpacityChanged(object? sender, TextChangedEventArgs e)
-    {
-        // Needs to implement
-    }
-
-    void OnVisibilityChanged(object? sender, TextChangedEventArgs e)
-    {
-        // Needs to implement
-    }
-
-    void OnBackgroundChanged(object? sender, TextChangedEventArgs e)
-    {
-        // Needs to implement
-    }
-
-    void OnZIndexChanged(object? sender, EventArgs e)
-    {
-        // Needs to implement
-    }
-
-    void OnRefreshInfoClicked(object? sender, EventArgs e)
-    {
-        // Needs to implement
-    }
+    };
 
     public BaseViewPropertiesPage(BaseViewModel viewModel)
     {
@@ -104,16 +24,7 @@ public class BaseViewPropertiesPage : ContentPage
         BindingContext = _viewModel;
         Title = "View Properties";
 
-        CreateStyles();
-
-        ToolbarItems.Add(new ToolbarItem
-        {
-            Text = "Apply",
-            Command = new Command(async () =>
-            {
-                await Navigation.PopToRootAsync();
-            })
-        });
+        InitializeToolbar();
 
         var layout = new VerticalStackLayout
         {
@@ -121,18 +32,36 @@ public class BaseViewPropertiesPage : ContentPage
             Padding = new Thickness(5, 0, 5, 0)
         };
 
-        layout.Add(new Label
+        BuildLayoutAndSizeSection(layout);
+        BuildAlignmentAndAppearanceSection(layout);
+        BuildBehaviorSection(layout);
+        BuildAdvancedSection(layout);
+        BuildReadOnlySection(layout);
+
+        Content = new ScrollView { Content = layout };
+    }
+
+    void InitializeToolbar()
+    {
+        ToolbarItems.Add(new ToolbarItem
         {
-            Text = "LAYOUT & SIZE",
-            Style = sectionHeaderStyle,
-            Margin = new Thickness(0, 8, 0, 0)
+            Text = "Apply",
+            Command = new Command(async () => await Navigation.PopToRootAsync())
         });
+    }
 
-        NavigateToLayoutAndSizePropertiesPageButton = new Button { Text = "Layout & Size Properties" };
-        NavigateToLayoutAndSizePropertiesPageButton.Clicked += OnNavigateToLayoutAndSizePropertiesPageClicked;
-        layout.Add(NavigateToLayoutAndSizePropertiesPageButton);
+    void BuildLayoutAndSizeSection(VerticalStackLayout layout)
+    {
+        layout.Add(CreateSectionHeader("LAYOUT & SIZE"));
 
-        Grid appearanceAndAlignmentGrid = new Grid
+        var button = new Button { Text = "Layout & Size Properties" };
+        button.Clicked += OnNavigateToLayoutAndSizePropertiesPageClicked;
+        layout.Add(button);
+    }
+
+    void BuildAlignmentAndAppearanceSection(VerticalStackLayout layout)
+    {
+        var grid = new Grid
         {
             ColumnSpacing = 5,
             ColumnDefinitions =
@@ -142,161 +71,153 @@ public class BaseViewPropertiesPage : ContentPage
             }
         };
 
-        var leftStack = new VerticalStackLayout
-        {
-            Spacing = 0
-        };
+        grid.Add(BuildAlignmentStack());
+        grid.Add(BuildAppearanceStack(), 1, 0);
 
-        leftStack.Add(new Label
-        {
-            Text = "ALIGNMENT",
-            Style = sectionHeaderStyle,
-            Margin = new Thickness(0, 8, 0, 0)
-        });
+        layout.Add(grid);
+    }
 
-        HorizontalOptionsEntry = new Entry();
-        HorizontalOptionsEntry.SetBinding(Entry.TextProperty, nameof(BaseViewModel.HorizontalOptionsText));
-        HorizontalOptionsEntry.TextChanged += OnHorizontalOptionsChanged;
-        leftStack.Add(PropertyPageHelpers.CreateStackedEntryRow("Horizontal Options", HorizontalOptionsEntry));
+    VerticalStackLayout BuildAlignmentStack()
+    {
+        var stack = new VerticalStackLayout { Spacing = 0 };
+        stack.Add(CreateSectionHeader("ALIGNMENT"));
 
-        VerticalOptionsEntry = new Entry();
-        VerticalOptionsEntry.SetBinding(Entry.TextProperty, nameof(BaseViewModel.VerticalOptionsText));
-        VerticalOptionsEntry.TextChanged += OnVerticalOptionsChanged;
-        leftStack.Add(PropertyPageHelpers.CreateStackedEntryRow("Vertical Options", VerticalOptionsEntry));
+        var horizontalOptionsEntry = new Entry();
+        horizontalOptionsEntry.TextChanged += OnHorizontalOptionsChanged;
+        stack.Add(PropertyPageHelpers.CreateStackedEntryRow("Horizontal Options", horizontalOptionsEntry));
 
-        FlowDirectionEntry = new Entry();
-        FlowDirectionEntry.SetBinding(Entry.TextProperty, nameof(BaseViewModel.FlowDirectionText));
-        FlowDirectionEntry.TextChanged += OnFlowDirectionChanged;
-        leftStack.Add(PropertyPageHelpers.CreateStackedEntryRow("Flow Direction", FlowDirectionEntry));
+        var verticalOptionsEntry = new Entry();
+        verticalOptionsEntry.TextChanged += OnVerticalOptionsChanged;
+        stack.Add(PropertyPageHelpers.CreateStackedEntryRow("Vertical Options", verticalOptionsEntry));
 
-        appearanceAndAlignmentGrid.Add(leftStack);
+        var flowDirectionEntry = new Entry();
+        flowDirectionEntry.TextChanged += OnFlowDirectionChanged;
+        stack.Add(PropertyPageHelpers.CreateStackedEntryRow("Flow Direction", flowDirectionEntry));
 
-        var rightStack = new VerticalStackLayout
-        {
-            Spacing = 0
-        };
+        return stack;
+    }
 
-        rightStack.Add(new Label
-        {
-            Text = "APPEARANCE",
-            Style = sectionHeaderStyle,
-            Margin = new Thickness(0, 8, 0, 0)
-        });
+    VerticalStackLayout BuildAppearanceStack()
+    {
+        var stack = new VerticalStackLayout { Spacing = 0 };
+        stack.Add(CreateSectionHeader("APPEARANCE"));
 
-        OpacityEntry = new Entry();
-        OpacityEntry.TextChanged += OnOpacityChanged;
-        rightStack.Add(PropertyPageHelpers.CreateStackedEntryRow("Opacity", OpacityEntry));
+        var opacityEntry = new Entry();
+        opacityEntry.TextChanged += OnOpacityChanged;
+        stack.Add(PropertyPageHelpers.CreateStackedEntryRow("Opacity (0 to 1)", opacityEntry));
 
-        VisibilityEntry = new Entry();
-        VisibilityEntry.TextChanged += OnVisibilityChanged;
-        rightStack.Add(PropertyPageHelpers.CreateStackedEntryRow("Visibility", VisibilityEntry));
+        var backgroundEntry = new Entry();
+        backgroundEntry.TextChanged += OnBackgroundChanged;
+        stack.Add(PropertyPageHelpers.CreateStackedEntryRow("Background", backgroundEntry));
 
-        BackgroundEntry = new Entry();
-        BackgroundEntry.TextChanged += OnBackgroundChanged;
-        rightStack.Add(PropertyPageHelpers.CreateStackedEntryRow("Background", BackgroundEntry));
+        return stack;
+    }
 
-        appearanceAndAlignmentGrid.Add(rightStack, 1, 0);
+    void BuildBehaviorSection(VerticalStackLayout layout)
+    {
+        var behaviorLayout = new HorizontalStackLayout { Spacing = 5 };
 
-        layout.Add(appearanceAndAlignmentGrid);
+        layout.Add(CreateSectionHeader("BEHAVIOR"));
 
-        HorizontalStackLayout behaviorLayout = new HorizontalStackLayout
-        {
-            Spacing = 5
-        };
-        layout.Add(new Label
-        {
-            Text = "BEHAVIOR",
-            Style = sectionHeaderStyle,
-            Margin = new Thickness(0, 8, 0, 0)
-        });
+        var isEnabledSwitch = new Switch();
+        isEnabledSwitch.SetBinding(Switch.IsToggledProperty, nameof(BaseViewModel.IsEnabled));
+        behaviorLayout.Add(PropertyPageHelpers.CreateStackedEntryRow("Is Enabled", isEnabledSwitch));
 
-        IsEnabledSwitch = new Switch();
-        IsEnabledSwitch.SetBinding(Switch.IsToggledProperty, nameof(BaseViewModel.IsEnabled));
-        behaviorLayout.Add(PropertyPageHelpers.CreateStackedEntryRow("Is Enabled", IsEnabledSwitch));
+        var inputTransparentSwitch = new Switch();
+        inputTransparentSwitch.SetBinding(Switch.IsToggledProperty, nameof(BaseViewModel.InputTransparent));
+        behaviorLayout.Add(PropertyPageHelpers.CreateStackedEntryRow("Input Transparent", inputTransparentSwitch));
 
-        InputTransparentSwitch = new Switch();
-        InputTransparentSwitch.SetBinding(Switch.IsToggledProperty, nameof(BaseViewModel.InputTransparent));
-        behaviorLayout.Add(PropertyPageHelpers.CreateStackedEntryRow("Input Transparent", InputTransparentSwitch));
+        var isVisibleSwitch = new Switch();
+        isVisibleSwitch.SetBinding(Switch.IsToggledProperty, nameof(BaseViewModel.IsVisible));
+        behaviorLayout.Add(PropertyPageHelpers.CreateStackedEntryRow("Is Visible", isVisibleSwitch));
 
         layout.Add(behaviorLayout);
-
-        layout.Add(new Label
-        {
-            Text = "ADVANCED",
-            Style = sectionHeaderStyle,
-            Margin = new Thickness(0, 8, 0, 0)
-        });
-
-        ZIndexEntry = new Entry();
-        ZIndexEntry.TextChanged += OnZIndexChanged;
-        layout.Add(PropertyPageHelpers.CreateStackedEntryRow("ZIndex", ZIndexEntry));
-
-        NavigateToShadowOptionsPageButton = new Button { Text = "Shadow Options" };
-        NavigateToShadowOptionsPageButton.Clicked += OnNavigateToShadowOptionsPageClicked;
-        layout.Add(NavigateToShadowOptionsPageButton);
-
-        NavigateToClipOptionsPageButton = new Button { Text = "Clip Options" };
-        NavigateToClipOptionsPageButton.Clicked += OnNavigateToClipOptionsPageClicked;
-        layout.Add(NavigateToClipOptionsPageButton);
-
-        MoreOptionsButton = new Button { Text = "More Options" };
-        MoreOptionsButton.Clicked += OnMoreOptionsPageClicked;
-
-        layout.Add(MoreOptionsButton);
-
-        layout.Add(new Label
-        {
-            Text = "READ-ONLY INFO",
-            Style = sectionHeaderStyle,
-            Margin = new Thickness(0, 8, 0, 0)
-        });
-
-        IsFocusedLabel = new Label { Style = SharedStyles.ValueLabelStyle };
-        layout.Add(PropertyPageHelpers.CreateStackedEntryRow("Is Focused", IsFocusedLabel));
-
-        DesiredSizeLabel = new Label { Style = SharedStyles.ValueLabelStyle };
-        layout.Add(PropertyPageHelpers.CreateStackedEntryRow("Desired Size", DesiredSizeLabel));
-
-        FrameLabel = new Label { Style = SharedStyles.ValueLabelStyle };
-        layout.Add(PropertyPageHelpers.CreateStackedEntryRow("Frame", FrameLabel));
-
-        Content = new ScrollView
-        {
-            Content = layout
-        };
     }
 
-    private void OnNavigateToLayoutAndSizePropertiesPageClicked(object? sender, EventArgs e)
+    void BuildAdvancedSection(VerticalStackLayout layout)
     {
+        layout.Add(CreateSectionHeader("ADVANCED"));
+
+        var zIndexEntry = new Entry();
+        zIndexEntry.TextChanged += OnZIndexChanged;
+        layout.Add(PropertyPageHelpers.CreateStackedEntryRow("ZIndex", zIndexEntry));
+
+        var shadowButton = new Button { Text = "Shadow Options" };
+        shadowButton.Clicked += OnNavigateToShadowOptionsPageClicked;
+        layout.Add(shadowButton);
+
+        var clipButton = new Button { Text = "Clip Options" };
+        clipButton.Clicked += OnNavigateToClipOptionsPageClicked;
+        layout.Add(clipButton);
+
+        var moreOptionsButton = new Button { Text = "More Options" };
+        moreOptionsButton.Clicked += OnMoreOptionsPageClicked;
+        layout.Add(moreOptionsButton);
+    }
+
+    void BuildReadOnlySection(VerticalStackLayout layout)
+    {
+        layout.Add(CreateSectionHeader("READ-ONLY INFO"));
+
+        var isFocusedLabel = new Label { Style = SharedStyles.ValueLabelStyle };
+        layout.Add(PropertyPageHelpers.CreateStackedEntryRow("Is Focused", isFocusedLabel));
+
+        var desiredSizeLabel = new Label { Style = SharedStyles.ValueLabelStyle };
+        layout.Add(PropertyPageHelpers.CreateStackedEntryRow("Desired Size", desiredSizeLabel));
+
+        var frameLabel = new Label { Style = SharedStyles.ValueLabelStyle };
+        layout.Add(PropertyPageHelpers.CreateStackedEntryRow("Frame", frameLabel));
+    }
+
+    static Label CreateSectionHeader(string text) => new()
+    {
+        Text = text,
+        Style = SectionHeaderStyle,
+        Margin = new Thickness(0, 8, 0, 0)
+    };
+
+    void OnHorizontalOptionsChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (!string.IsNullOrWhiteSpace(e.NewTextValue))
+            _viewModel?.HorizontalOptions = PropertyHelperExtensions.ToLayoutOptions(e.NewTextValue);
+    }
+
+    void OnVerticalOptionsChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (!string.IsNullOrWhiteSpace(e.NewTextValue))
+            _viewModel?.VerticalOptions = PropertyHelperExtensions.ToLayoutOptions(e.NewTextValue);
+    }
+
+    void OnFlowDirectionChanged(object? sender, TextChangedEventArgs e)
+    {
+        if (!string.IsNullOrWhiteSpace(e.NewTextValue))
+            _viewModel?.FlowDirection = PropertyHelperExtensions.ToFlowDirection(e.NewTextValue);
+    }
+
+    void OnOpacityChanged(object? sender, TextChangedEventArgs e)
+    {
+        _viewModel?.Opacity = e.NewTextValue is not null && double.TryParse(e.NewTextValue, out var parsed) ? parsed : 1.0;
+    }
+
+    void OnBackgroundChanged(object? sender, TextChangedEventArgs e)
+    {
+        _viewModel?.Background = PropertyHelperExtensions.ToColor(e.NewTextValue);
+    }
+
+    void OnZIndexChanged(object? sender, TextChangedEventArgs e)
+    {
+        _viewModel?.ZIndex = e.NewTextValue is not null && int.TryParse(e.NewTextValue, out var parsed) ? parsed : 0;
+    }
+
+    void OnNavigateToLayoutAndSizePropertiesPageClicked(object? sender, EventArgs e) =>
         Navigation.PushAsync(new LayoutAndSizePropertiesPage(_viewModel));
-    }
 
-    void OnNavigateToShadowOptionsPageClicked(object? sender, EventArgs e)
-    {
+    void OnNavigateToShadowOptionsPageClicked(object? sender, EventArgs e) =>
         Navigation.PushAsync(new ShadowPropertiesPage());
-    }
 
-    void OnNavigateToClipOptionsPageClicked(object? sender, EventArgs e)
-    {
+    void OnNavigateToClipOptionsPageClicked(object? sender, EventArgs e) =>
         Navigation.PushAsync(new ClipPropertiesPage());
-    }
 
-    void OnMoreOptionsPageClicked(object? sender, EventArgs e)
-    {
+    void OnMoreOptionsPageClicked(object? sender, EventArgs e) =>
         Navigation.PushAsync(new TransformPropertiesPage());
-    }
 }
-
-// NOTE (backlog / not yet implemented):
-// 1. Change all pickers to Entry.
-// 2. Change all sliders to Entry.
-// 3. Add const strings for enum-like values (layout options, flow direction, visibility).
-// 4. Background entry should support both named colors and hex values.
-// 5. Expose all Shadow/Clip properties as entry fields.
-// 6. Make the page non scrollable.
-// 7. Add a "reset to default" button.
-// 8. Show options in a dedicated page listing all properties and current values;
-//    tapping a property navigates to a page to edit that value.
-// 9. Flow: main page shows the control + toolbar "Options" button -> options page
-//    lists that control's properties (+ "More options" for additional/base settings).
-// 10. Keep everything C# only, no XAML.
