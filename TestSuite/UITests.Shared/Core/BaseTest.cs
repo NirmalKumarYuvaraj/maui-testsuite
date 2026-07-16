@@ -33,4 +33,13 @@ public abstract class BaseTest
 
 	protected void TakeScreenshot(string name)
 		=> ScreenshotManager.Capture(App, name);
+
+	/// <summary>
+	/// Captures a screenshot and compares it against its stored baseline
+	/// image (see spec/UITestArchitecture.md §22). Assert on
+	/// <see cref="ImageComparisonResult.Matches"/> in the test body so the
+	/// failure message can include the diff percentage/path.
+	/// </summary>
+	protected ImageComparisonResult CompareToBaseline(string name, double threshold = ScreenshotComparer.DefaultMatchThreshold)
+		=> ScreenshotManager.CompareToBaseline(App, name, threshold);
 }
