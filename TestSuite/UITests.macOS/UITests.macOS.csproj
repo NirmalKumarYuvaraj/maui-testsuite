@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <IsTestProject>true</IsTestProject>
 	  <RootNamespace>UITests</RootNamespace>
+	  <DefineConstants>$(DefineConstants);UITEST_MACOS</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

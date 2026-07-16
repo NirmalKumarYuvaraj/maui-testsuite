@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <IsTestProject>true</IsTestProject>
     <RootNamespace>UITests</RootNamespace>
+    <DefineConstants>$(DefineConstants);UITEST_ANDROID</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
