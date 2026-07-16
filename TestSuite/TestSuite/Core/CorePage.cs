@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using TestSuite.AutomationIds;
 using TestSuite.Views;
 
 namespace TestSuite.Core;
@@ -105,6 +106,7 @@ public class CorePage : ContentPage
 
         _searchEntry = new Entry
         {
+            AutomationId = CoreIds.SearchEntry,
             Placeholder = "Enter a control name to search",
             Margin = new Thickness(8, 4),
             BackgroundColor = Colors.White,
@@ -117,6 +119,7 @@ public class CorePage : ContentPage
 
         Button searchButton = new Button
         {
+            AutomationId = CoreIds.SearchButton,
             Text = "Search",
             Margin = new Thickness(8, 4),
         };
@@ -163,6 +166,7 @@ public class CorePage : ContentPage
     {
         CollectionView collectionView = new CollectionView
         {
+            AutomationId = CoreIds.ControlsList,
             ItemsSource = _itemsSource,
             IsGrouped = true,
             SelectionMode = SelectionMode.Single,
