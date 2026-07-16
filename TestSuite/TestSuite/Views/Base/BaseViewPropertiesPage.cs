@@ -1,32 +1,33 @@
 
+using TestSuite.Helper;
 using TestSuite.ViewModels.Base;
 
 namespace TestSuite.Views.Base;
 
 public class BaseViewPropertiesPage : ContentPage
 {
-    Entry? HorizontalOptionsEntry;
-    Entry? VerticalOptionsEntry;
-    Entry? FlowDirectionEntry;
-    Entry? OpacityEntry;
-    Entry? VisibilityEntry;
-    Entry? BackgroundEntry;
-    Switch? IsEnabledSwitch;
-    Switch? InputTransparentSwitch;
-    Entry? ZIndexEntry;
+    readonly Entry? HorizontalOptionsEntry;
+    readonly Entry? VerticalOptionsEntry;
+    readonly Entry? FlowDirectionEntry;
+    readonly Entry? OpacityEntry;
+    readonly Entry? VisibilityEntry;
+    readonly Entry? BackgroundEntry;
+    readonly Switch? IsEnabledSwitch;
+    readonly Switch? InputTransparentSwitch;
+    readonly Entry? ZIndexEntry;
 
-    Button? NavigateToLayoutAndSizePropertiesPageButton;
-    Button? NavigateToShadowOptionsPageButton;
-    Button? NavigateToClipOptionsPageButton;
-    Button? MoreOptionsButton;
+    readonly Button? NavigateToLayoutAndSizePropertiesPageButton;
+    readonly Button? NavigateToShadowOptionsPageButton;
+    readonly Button? NavigateToClipOptionsPageButton;
+    readonly Button? MoreOptionsButton;
 
-    Label? IsFocusedLabel;
-    Label? DesiredSizeLabel;
-    Label? FrameLabel;
+    readonly Label? IsFocusedLabel;
+    readonly Label? DesiredSizeLabel;
+    readonly Label? FrameLabel;
 
     Style? sectionHeaderStyle;
 
-    BaseViewModel? _viewModel;
+    readonly BaseViewModel? _viewModel;
 
     void CreateStyles()
     {
@@ -42,19 +43,34 @@ public class BaseViewPropertiesPage : ContentPage
         };
     }
 
-    void OnHorizontalOptionsChanged(object? sender, EventArgs e)
+    void OnHorizontalOptionsChanged(object? sender, TextChangedEventArgs e)
     {
-        // Needs to implement
+        var newText = e.NewTextValue;
+        if (string.IsNullOrWhiteSpace(newText))
+        {
+            return;
+        }
+        _viewModel?.HorizontalOptions = PropertyTypeResolver.ToLayoutOptions(newText);
     }
 
-    void OnVerticalOptionsChanged(object? sender, EventArgs e)
+    void OnVerticalOptionsChanged(object? sender, TextChangedEventArgs e)
     {
-        // Needs to implement
+        var newText = e.NewTextValue;
+        if (string.IsNullOrWhiteSpace(newText))
+        {
+            return;
+        }
+        _viewModel?.VerticalOptions = PropertyTypeResolver.ToLayoutOptions(newText);
     }
 
-    void OnFlowDirectionChanged(object? sender, EventArgs e)
+    void OnFlowDirectionChanged(object? sender, TextChangedEventArgs e)
     {
-        // Needs to implement
+        var newText = e.NewTextValue;
+        if (string.IsNullOrWhiteSpace(newText))
+        {
+            return;
+        }
+        _viewModel?.FlowDirection = PropertyTypeResolver.ToFlowDirection(newText);
     }
 
     void OnOpacityChanged(object? sender, TextChangedEventArgs e)
@@ -62,27 +78,17 @@ public class BaseViewPropertiesPage : ContentPage
         // Needs to implement
     }
 
-    void OnVisibilityChanged(object? sender, EventArgs e)
+    void OnVisibilityChanged(object? sender, TextChangedEventArgs e)
     {
         // Needs to implement
     }
 
-    void OnBackgroundChanged(object? sender, EventArgs e)
+    void OnBackgroundChanged(object? sender, TextChangedEventArgs e)
     {
         // Needs to implement
     }
 
-    void OnIsEnabledToggled(object? sender, ToggledEventArgs e)
-    {
-        // Needs to implement
-    }
-
-    void OnInputTransparentToggled(object? sender, ToggledEventArgs e)
-    {
-        // Needs to implement
-    }
-
-    void OnZIndexChanged(object? sender, TextChangedEventArgs e)
+    void OnZIndexChanged(object? sender, EventArgs e)
     {
         // Needs to implement
     }
@@ -112,6 +118,7 @@ public class BaseViewPropertiesPage : ContentPage
         var layout = new VerticalStackLayout
         {
             Spacing = 5,
+            Padding = new Thickness(5, 0, 5, 0)
         };
 
         layout.Add(new Label
@@ -148,14 +155,17 @@ public class BaseViewPropertiesPage : ContentPage
         });
 
         HorizontalOptionsEntry = new Entry();
+        HorizontalOptionsEntry.SetBinding(Entry.TextProperty, nameof(BaseViewModel.HorizontalOptionsText));
         HorizontalOptionsEntry.TextChanged += OnHorizontalOptionsChanged;
         leftStack.Add(PropertyPageHelpers.CreateStackedEntryRow("Horizontal Options", HorizontalOptionsEntry));
 
         VerticalOptionsEntry = new Entry();
+        VerticalOptionsEntry.SetBinding(Entry.TextProperty, nameof(BaseViewModel.VerticalOptionsText));
         VerticalOptionsEntry.TextChanged += OnVerticalOptionsChanged;
         leftStack.Add(PropertyPageHelpers.CreateStackedEntryRow("Vertical Options", VerticalOptionsEntry));
 
         FlowDirectionEntry = new Entry();
+        FlowDirectionEntry.SetBinding(Entry.TextProperty, nameof(BaseViewModel.FlowDirectionText));
         FlowDirectionEntry.TextChanged += OnFlowDirectionChanged;
         leftStack.Add(PropertyPageHelpers.CreateStackedEntryRow("Flow Direction", FlowDirectionEntry));
 
@@ -201,11 +211,11 @@ public class BaseViewPropertiesPage : ContentPage
         });
 
         IsEnabledSwitch = new Switch();
-        IsEnabledSwitch.SetBinding(Switch.IsToggledProperty, nameof(BaseViewModel.IsEnabled), BindingMode.TwoWay);
+        IsEnabledSwitch.SetBinding(Switch.IsToggledProperty, nameof(BaseViewModel.IsEnabled));
         behaviorLayout.Add(PropertyPageHelpers.CreateStackedEntryRow("Is Enabled", IsEnabledSwitch));
 
         InputTransparentSwitch = new Switch();
-        InputTransparentSwitch.Toggled += OnInputTransparentToggled;
+        InputTransparentSwitch.SetBinding(Switch.IsToggledProperty, nameof(BaseViewModel.InputTransparent));
         behaviorLayout.Add(PropertyPageHelpers.CreateStackedEntryRow("Input Transparent", InputTransparentSwitch));
 
         layout.Add(behaviorLayout);
@@ -273,7 +283,7 @@ public class BaseViewPropertiesPage : ContentPage
 
     void OnMoreOptionsPageClicked(object? sender, EventArgs e)
     {
-        // future implementation for more options navigation
+        Navigation.PushAsync(new TransformPropertiesPage());
     }
 }
 

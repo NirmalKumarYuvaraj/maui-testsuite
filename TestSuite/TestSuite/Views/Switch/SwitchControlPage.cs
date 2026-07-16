@@ -37,7 +37,7 @@ public class SwitchControlPage : ContentPage
         Title = "Switch Control";
 
 
-        TestSwitch.SetBinding(Switch.IsEnabledProperty, nameof(SwitchViewModel.IsEnabled), BindingMode.TwoWay);
+        TestSwitch.SetBinding(Switch.IsEnabledProperty, nameof(SwitchViewModel.IsEnabled));
         TestSwitch.SetBinding(Switch.IsToggledProperty, nameof(SwitchViewModel.IsToggled));
         layout.Children.Add(TestSwitch);
 
