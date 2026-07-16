@@ -21,50 +21,23 @@ public class ShadowPropertiesPage : ContentPage
         };
 
         ShadowBrushEntry = new Entry();
-        layout.Add(CreateEntryRow("Shadow Brush", ShadowBrushEntry));
+        layout.Add(PropertyPageHelpers.CreateEntryRow("Shadow Brush", ShadowBrushEntry, new Thickness(8, 4)));
 
         ShadowOffsetXEntry = new Entry();
-        layout.Add(CreateEntryRow("Shadow Offset X", ShadowOffsetXEntry));
+        layout.Add(PropertyPageHelpers.CreateEntryRow("Shadow Offset X", ShadowOffsetXEntry, new Thickness(8, 4)));
 
         ShadowOffsetYEntry = new Entry();
-        layout.Add(CreateEntryRow("Shadow Offset Y", ShadowOffsetYEntry));
+        layout.Add(PropertyPageHelpers.CreateEntryRow("Shadow Offset Y", ShadowOffsetYEntry, new Thickness(8, 4)));
 
         ShadowOpacityEntry = new Entry();
-        layout.Add(CreateEntryRow("Shadow Opacity", ShadowOpacityEntry));
+        layout.Add(PropertyPageHelpers.CreateEntryRow("Shadow Opacity", ShadowOpacityEntry, new Thickness(8, 4)));
 
         ShadowRadiusEntry = new Entry();
-        layout.Add(CreateEntryRow("Shadow Radius", ShadowRadiusEntry));
+        layout.Add(PropertyPageHelpers.CreateEntryRow("Shadow Radius", ShadowRadiusEntry, new Thickness(8, 4)));
 
         Content = new ScrollView
         {
             Content = layout
         };
-    }
-
-    Grid CreateEntryRow(string text, View view)
-    {
-        var grid = new Grid
-        {
-            Padding = new Thickness(8, 4),
-            ColumnSpacing = 8,
-            ColumnDefinitions =
-   {
-    new ColumnDefinition { Width = 160 },
-    new ColumnDefinition { Width = GridLength.Star }
-   }
-        };
-
-        grid.Add(new Label
-        {
-            Text = text,
-            FontSize = 13,
-            VerticalOptions = LayoutOptions.Center,
-            TextColor = Color.FromArgb("#333")
-        });
-
-        Grid.SetColumn(view, 1);
-        grid.Add(view);
-
-        return grid;
     }
 }

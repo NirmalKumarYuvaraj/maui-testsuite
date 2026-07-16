@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using TestSuite.Views;
 
 namespace TestSuite.Core;
 
@@ -67,14 +68,19 @@ public class CorePage : ContentPage
             }
     };
 
-    ObservableCollection<ControlGroup> _itemsSource =
-        new ObservableCollection<ControlGroup>
+    // Single source of truth for the group name -> items pairs, used both to
+    // seed _itemsSource and to drive the search filtering below.
+    static readonly (string GroupName, string[] Items)[] _groups =
     {
-        new ControlGroup("Controls", _controls),
-        new ControlGroup("Layouts", _layouts),
-        new ControlGroup("Pages", _pages),
-        new ControlGroup("Shells", _shells)
+        ("Controls", _controls),
+        ("Layouts", _layouts),
+        ("Pages", _pages),
+        ("Shells", _shells)
     };
+
+    ObservableCollection<ControlGroup> _itemsSource =
+        new ObservableCollection<ControlGroup>(
+            _groups.Select(g => new ControlGroup(g.GroupName, g.Items)));
 
     Entry? _searchEntry;
 
@@ -140,25 +146,17 @@ public class CorePage : ContentPage
 
         searchText = searchText.ToLowerInvariant();
 
-        var filteredControls = _controls.Where(c => c.Contains(searchText, StringComparison.InvariantCultureIgnoreCase)).ToList();
-        var filteredLayouts = _layouts.Where(l => l.Contains(searchText, StringComparison.InvariantCultureIgnoreCase)).ToList();
-        var filteredPages = _pages.Where(p => p.Contains(searchText, StringComparison.InvariantCultureIgnoreCase)).ToList();
-        var filteredShells = _shells.Where(s => s.Contains(searchText, StringComparison.InvariantCultureIgnoreCase)).ToList();
-
         _itemsSource.Clear();
 
-        if (filteredControls.Count != 0)
-            _itemsSource.Add(new ControlGroup("Controls", filteredControls));
+        foreach (var group in _groups)
+        {
+            var filteredItems = group.Items
+                .Where(item => item.Contains(searchText, StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
 
-        if (filteredLayouts.Count != 0)
-            _itemsSource.Add(new ControlGroup("Layouts", filteredLayouts));
-
-        if (filteredPages.Count != 0)
-            _itemsSource.Add(new ControlGroup("Pages", filteredPages));
-
-        if (filteredShells.Count != 0)
-            _itemsSource.Add(new ControlGroup("Shells", filteredShells));
-
+            if (filteredItems.Count != 0)
+                _itemsSource.Add(new ControlGroup(group.GroupName, filteredItems));
+        }
     }
 
     CollectionView CreateCollectionView()
@@ -225,10 +223,20 @@ public class CorePage : ContentPage
         return collectionView;
     }
 
+    // Explicit registry of implemented control pages. Keeps navigation type-safe
+    // and avoids reflecting on a "TestSuite.Views.{name}.{name}NavPage" naming
+    // convention that throws a NullReferenceException for any page not yet built.
+    static readonly Dictionary<string, Func<Page>> _navPageFactories = new()
+    {
+        ["Switch"] = () => new SwitchNavPage(),
+    };
+
     void PerformNavigation(string? controlName)
     {
-        var pageType = Type.GetType($"TestSuite.Views.{controlName}.{controlName}ControlPage");
-        Navigation.PushAsync((Page)Activator.CreateInstance(pageType!)!);
+        if (controlName is null || !_navPageFactories.TryGetValue(controlName, out var createPage))
+            return; // No page implemented for this control yet.
+
+        Application.Current!.Windows[0].Page = createPage();
     }
 }
 
