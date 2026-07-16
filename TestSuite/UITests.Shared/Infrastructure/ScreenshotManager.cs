@@ -43,6 +43,29 @@ public static class ScreenshotManager
     static readonly string ActualDirectory = Path.Combine("Screenshots", "Actual", PlatformDirectoryName);
     static readonly string DiffDirectory = Path.Combine("Screenshots", "Diff", PlatformDirectoryName);
 
+    /// <summary>
+    /// Default pixels to crop off each edge before comparing, matching
+    /// dotnet/maui's own <c>UITest.cs</c> crop defaults: OS chrome (status
+    /// bar, 3-button nav, title bar) isn't part of the app under test and
+    /// changes between runs (clock, ripple/nav-button flash, theme), so it's
+    /// cropped out rather than causing false-positive diffs. These pixel
+    /// values assume the same reference simulator/emulator sizes MAUI's UI
+    /// tests use — override via <see cref="CompareToBaseline"/>'s crop
+    /// parameters if this suite targets different devices.
+    /// </summary>
+    static readonly (int Left, int Top, int Right, int Bottom) DefaultCropInsets =
+#if UITEST_ANDROID
+        (0, 60, 0, 125);
+#elif UITEST_IOS
+        (0, 110, 0, 40);
+#elif UITEST_WINDOWS
+        (0, 32, 0, 0);
+#elif UITEST_MACOS
+        (0, 29, 0, 0);
+#else
+        (0, 0, 0, 0);
+#endif
+
     static bool ShouldUpdateBaselines
     {
         get
@@ -75,15 +98,34 @@ public static class ScreenshotManager
     /// screenshot becomes the new baseline and the comparison is reported as
     /// a match. Diff images (when pixels differ) are written to
     /// <c>Screenshots/Diff/{Platform}/{name}.png</c>.
+    /// Crop parameters default to <see cref="DefaultCropInsets"/> (per-platform
+    /// status bar/nav bar/title bar insets) when left <see langword="null"/>;
+    /// pass 0 explicitly for an edge to disable cropping there instead of
+    /// using the default.
     /// </remarks>
+    /// <param name="cropLeft">Pixels to crop from the left edge before comparing.</param>
+    /// <param name="cropTop">Pixels to crop from the top edge before comparing.</param>
+    /// <param name="cropRight">Pixels to crop from the right edge before comparing.</param>
+    /// <param name="cropBottom">Pixels to crop from the bottom edge before comparing.</param>
     public static ImageComparisonResult CompareToBaseline(
         AppiumDriver driver,
         string name,
-        double threshold = ScreenshotComparer.DefaultMatchThreshold)
+        double threshold = ScreenshotComparer.DefaultMatchThreshold,
+        int? cropLeft = null,
+        int? cropTop = null,
+        int? cropRight = null,
+        int? cropBottom = null)
     {
         Directory.CreateDirectory(ActualDirectory);
         var actualPath = Path.Combine(ActualDirectory, $"{name}.png");
-        driver.GetScreenshot().SaveAsFile(actualPath);
+
+        var screenshotBytes = ScreenshotComparer.Crop(
+            driver.GetScreenshot().AsByteArray,
+            cropLeft ?? DefaultCropInsets.Left,
+            cropTop ?? DefaultCropInsets.Top,
+            cropRight ?? DefaultCropInsets.Right,
+            cropBottom ?? DefaultCropInsets.Bottom);
+        File.WriteAllBytes(actualPath, screenshotBytes);
 
         Directory.CreateDirectory(BaselineDirectory);
         var baselinePath = Path.Combine(BaselineDirectory, $"{name}.png");

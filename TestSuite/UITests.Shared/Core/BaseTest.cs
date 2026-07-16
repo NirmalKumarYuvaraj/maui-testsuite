@@ -38,8 +38,16 @@ public abstract class BaseTest
 	/// Captures a screenshot and compares it against its stored baseline
 	/// image (see spec/UITestArchitecture.md §22). Assert on
 	/// <see cref="ImageComparisonResult.Matches"/> in the test body so the
-	/// failure message can include the diff percentage/path.
+	/// failure message can include the diff percentage/path. Crop params
+	/// default to the platform's status bar/nav bar/title bar insets; pass 0
+	/// explicitly for an edge to disable cropping there instead.
 	/// </summary>
-	protected ImageComparisonResult CompareToBaseline(string name, double threshold = ScreenshotComparer.DefaultMatchThreshold)
-		=> ScreenshotManager.CompareToBaseline(App, name, threshold);
+	protected ImageComparisonResult CompareToBaseline(
+		string name,
+		double threshold = ScreenshotComparer.DefaultMatchThreshold,
+		int? cropLeft = null,
+		int? cropTop = null,
+		int? cropRight = null,
+		int? cropBottom = null)
+		=> ScreenshotManager.CompareToBaseline(App, name, threshold, cropLeft, cropTop, cropRight, cropBottom);
 }

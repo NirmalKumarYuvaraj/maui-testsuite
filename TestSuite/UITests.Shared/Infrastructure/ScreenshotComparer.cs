@@ -111,6 +111,42 @@ public static class ScreenshotComparer
         return new ImageComparisonResult(matches, diffPercentage, writtenDiffPath);
     }
 
+    /// <summary>
+    /// Crops <paramref name="left"/>/<paramref name="top"/>/<paramref name="right"/>/
+    /// <paramref name="bottom"/> pixels off the corresponding edges of a PNG image,
+    /// returning the cropped PNG bytes. Used to remove OS chrome (status bar,
+    /// nav bar, title bar) that isn't part of the app under test and would
+    /// otherwise cause false-positive diffs (it varies run to run — clock,
+    /// ripple/nav-button flashes, theme-dependent title bars, etc.).
+    /// </summary>
+    /// <remarks>
+    /// A no-op (returns <paramref name="pngBytes"/> unchanged) when all insets are
+    /// zero or negative, so callers can pass platform defaults unconditionally.
+    /// </remarks>
+    public static byte[] Crop(byte[] pngBytes, int left, int top, int right, int bottom)
+    {
+        if (left <= 0 && top <= 0 && right <= 0 && bottom <= 0)
+            return pngBytes;
+
+        using var bitmap = SKBitmap.Decode(pngBytes);
+
+        var cropRect = SKRectI.Create(left, top, bitmap.Width - left - right, bitmap.Height - top - bottom);
+        if (cropRect.Width <= 0 || cropRect.Height <= 0)
+        {
+            throw new ArgumentException(
+                $"Crop insets (left={left}, top={top}, right={right}, bottom={bottom}) leave nothing " +
+                $"of the {bitmap.Width}x{bitmap.Height} image — reduce the insets or pass overrides.");
+        }
+
+        using var cropped = new SKBitmap(cropRect.Width, cropRect.Height);
+        if (!bitmap.ExtractSubset(cropped, cropRect))
+            throw new InvalidOperationException("Failed to extract the cropped image subset.");
+
+        using var image = SKImage.FromBitmap(cropped);
+        using var data = image.Encode(SKEncodedImageFormat.Png, quality: 100);
+        return data.ToArray();
+    }
+
     static bool PixelsMatch(SKColor a, SKColor b, int channelTolerance)
         => Math.Abs(a.Red - b.Red) <= channelTolerance
         && Math.Abs(a.Green - b.Green) <= channelTolerance
