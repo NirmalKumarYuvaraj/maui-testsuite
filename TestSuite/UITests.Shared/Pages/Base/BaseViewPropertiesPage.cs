@@ -7,26 +7,51 @@ namespace UITests.Pages.Base;
 /// <summary>
 /// Page Object for the shared <c>Views/Base/BaseViewPropertiesPage.cs</c>
 /// editor, reused by every control's Properties flow (spec
-/// /UITestArchitecture.md §4.2/§10). Only the fields the host app currently
-/// wires up to a bindable property (Opacity, IsEnabled, IsVisible) have
-/// typed setters here — the rest of that page (alignment, background,
-/// ZIndex, etc.) is not yet functional in the host app, so no automation is
-/// exposed for it until it is (see tasks.md Phase 4 notes).
+/// /UITestArchitecture.md §4.2/§10). Every field on that page has an
+/// AutomationId and a typed accessor here.
 /// </summary>
 public class BaseViewPropertiesPage : BasePage
 {
-    public void SetOpacity(double opacity)
-    {
-        var entry = WaitForElement(BaseViewIds.OpacityEntry);
-        entry.Clear();
-        entry.SendKeys(opacity.ToString(CultureInfo.InvariantCulture));
-    }
+    // ── Layout & size ────────────────────────────────────────────────────
+    // No Page Object exists yet for LayoutAndSizePropertiesPage (out of
+    // scope for this change) — returns void; navigate there directly if a
+    // future test needs it, once that page gets its own Page Object.
+    public void OpenLayoutAndSize() => FindElement(BaseViewIds.LayoutAndSizeButton).Click();
 
-    public void SetEnabled(bool isEnabled)
-        => SetSwitch(BaseViewIds.IsEnabledSwitch, isEnabled);
+    // ── Alignment ────────────────────────────────────────────────────────
+    public void SetHorizontalOptions(string value) => SetEntry(BaseViewIds.HorizontalOptionsEntry, value);
 
-    public void SetVisible(bool isVisible)
-        => SetSwitch(BaseViewIds.IsVisibleSwitch, isVisible);
+    public void SetVerticalOptions(string value) => SetEntry(BaseViewIds.VerticalOptionsEntry, value);
+
+    public void SetFlowDirection(string value) => SetEntry(BaseViewIds.FlowDirectionEntry, value);
+
+    // ── Appearance ───────────────────────────────────────────────────────
+    public void SetOpacity(double opacity) => SetEntry(BaseViewIds.OpacityEntry, opacity.ToString(CultureInfo.InvariantCulture));
+
+    public void SetBackground(string value) => SetEntry(BaseViewIds.BackgroundEntry, value);
+
+    // ── Behavior ─────────────────────────────────────────────────────────
+    public void SetEnabled(bool isEnabled) => SetSwitch(BaseViewIds.IsEnabledSwitch, isEnabled);
+
+    public void SetInputTransparent(bool inputTransparent) => SetSwitch(BaseViewIds.InputTransparentSwitch, inputTransparent);
+
+    public void SetVisible(bool isVisible) => SetSwitch(BaseViewIds.IsVisibleSwitch, isVisible);
+
+    // ── Advanced ─────────────────────────────────────────────────────────
+    public void SetZIndex(int zIndex) => SetEntry(BaseViewIds.ZIndexEntry, zIndex.ToString(CultureInfo.InvariantCulture));
+
+    public void OpenShadowOptions() => FindElement(BaseViewIds.ShadowOptionsButton).Click();
+
+    public void OpenClipOptions() => FindElement(BaseViewIds.ClipOptionsButton).Click();
+
+    public void OpenMoreOptions() => FindElement(BaseViewIds.MoreOptionsButton).Click();
+
+    // ── Read-only info ───────────────────────────────────────────────────
+    public string IsFocusedText => WaitForElement(BaseViewIds.IsFocusedLabel).Text;
+
+    public string DesiredSizeText => WaitForElement(BaseViewIds.DesiredSizeLabel).Text;
+
+    public string FrameText => WaitForElement(BaseViewIds.FrameLabel).Text;
 
     /// <summary>
     /// Applies changes. The host app's "Apply" toolbar item calls
@@ -38,6 +63,13 @@ public class BaseViewPropertiesPage : BasePage
     /// </summary>
     public void Apply()
         => FindElement(BaseViewIds.ApplyToolbarItem).Click();
+
+    void SetEntry(string automationId, string value)
+    {
+        var entry = WaitForElement(automationId);
+        entry.Clear();
+        entry.SendKeys(value);
+    }
 
     void SetSwitch(string automationId, bool desiredState)
     {

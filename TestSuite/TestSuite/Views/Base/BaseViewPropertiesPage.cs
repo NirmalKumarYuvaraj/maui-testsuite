@@ -56,7 +56,7 @@ public class BaseViewPropertiesPage : ContentPage
     {
         layout.Add(CreateSectionHeader("LAYOUT & SIZE"));
 
-        var button = new Button { Text = "Layout & Size Properties" };
+        var button = new Button { Text = "Layout & Size Properties", AutomationId = BaseViewIds.LayoutAndSizeButton };
         button.Clicked += OnNavigateToLayoutAndSizePropertiesPageClicked;
         layout.Add(button);
     }
@@ -84,15 +84,15 @@ public class BaseViewPropertiesPage : ContentPage
         var stack = new VerticalStackLayout { Spacing = 0 };
         stack.Add(CreateSectionHeader("ALIGNMENT"));
 
-        var horizontalOptionsEntry = new Entry();
+        var horizontalOptionsEntry = new Entry { AutomationId = BaseViewIds.HorizontalOptionsEntry };
         horizontalOptionsEntry.TextChanged += OnHorizontalOptionsChanged;
         stack.Add(PropertyPageHelpers.CreateStackedEntryRow("Horizontal Options", horizontalOptionsEntry));
 
-        var verticalOptionsEntry = new Entry();
+        var verticalOptionsEntry = new Entry { AutomationId = BaseViewIds.VerticalOptionsEntry };
         verticalOptionsEntry.TextChanged += OnVerticalOptionsChanged;
         stack.Add(PropertyPageHelpers.CreateStackedEntryRow("Vertical Options", verticalOptionsEntry));
 
-        var flowDirectionEntry = new Entry();
+        var flowDirectionEntry = new Entry { AutomationId = BaseViewIds.FlowDirectionEntry };
         flowDirectionEntry.TextChanged += OnFlowDirectionChanged;
         stack.Add(PropertyPageHelpers.CreateStackedEntryRow("Flow Direction", flowDirectionEntry));
 
@@ -108,7 +108,7 @@ public class BaseViewPropertiesPage : ContentPage
         opacityEntry.TextChanged += OnOpacityChanged;
         stack.Add(PropertyPageHelpers.CreateStackedEntryRow("Opacity (0 to 1)", opacityEntry));
 
-        var backgroundEntry = new Entry();
+        var backgroundEntry = new Entry { AutomationId = BaseViewIds.BackgroundEntry };
         backgroundEntry.TextChanged += OnBackgroundChanged;
         stack.Add(PropertyPageHelpers.CreateStackedEntryRow("Background", backgroundEntry));
 
@@ -125,7 +125,7 @@ public class BaseViewPropertiesPage : ContentPage
         isEnabledSwitch.SetBinding(Switch.IsToggledProperty, nameof(BaseViewModel.IsEnabled));
         behaviorLayout.Add(PropertyPageHelpers.CreateStackedEntryRow("Is Enabled", isEnabledSwitch));
 
-        var inputTransparentSwitch = new Switch();
+        var inputTransparentSwitch = new Switch { AutomationId = BaseViewIds.InputTransparentSwitch };
         inputTransparentSwitch.SetBinding(Switch.IsToggledProperty, nameof(BaseViewModel.InputTransparent));
         behaviorLayout.Add(PropertyPageHelpers.CreateStackedEntryRow("Input Transparent", inputTransparentSwitch));
 
@@ -140,19 +140,19 @@ public class BaseViewPropertiesPage : ContentPage
     {
         layout.Add(CreateSectionHeader("ADVANCED"));
 
-        var zIndexEntry = new Entry();
+        var zIndexEntry = new Entry { AutomationId = BaseViewIds.ZIndexEntry };
         zIndexEntry.TextChanged += OnZIndexChanged;
         layout.Add(PropertyPageHelpers.CreateStackedEntryRow("ZIndex", zIndexEntry));
 
-        var shadowButton = new Button { Text = "Shadow Options" };
+        var shadowButton = new Button { Text = "Shadow Options", AutomationId = BaseViewIds.ShadowOptionsButton };
         shadowButton.Clicked += OnNavigateToShadowOptionsPageClicked;
         layout.Add(shadowButton);
 
-        var clipButton = new Button { Text = "Clip Options" };
+        var clipButton = new Button { Text = "Clip Options", AutomationId = BaseViewIds.ClipOptionsButton };
         clipButton.Clicked += OnNavigateToClipOptionsPageClicked;
         layout.Add(clipButton);
 
-        var moreOptionsButton = new Button { Text = "More Options" };
+        var moreOptionsButton = new Button { Text = "More Options", AutomationId = BaseViewIds.MoreOptionsButton };
         moreOptionsButton.Clicked += OnMoreOptionsPageClicked;
         layout.Add(moreOptionsButton);
     }
@@ -161,13 +161,13 @@ public class BaseViewPropertiesPage : ContentPage
     {
         layout.Add(CreateSectionHeader("READ-ONLY INFO"));
 
-        var isFocusedLabel = new Label { Style = SharedStyles.ValueLabelStyle };
+        var isFocusedLabel = new Label { Style = SharedStyles.ValueLabelStyle, AutomationId = BaseViewIds.IsFocusedLabel };
         layout.Add(PropertyPageHelpers.CreateStackedEntryRow("Is Focused", isFocusedLabel));
 
-        var desiredSizeLabel = new Label { Style = SharedStyles.ValueLabelStyle };
+        var desiredSizeLabel = new Label { Style = SharedStyles.ValueLabelStyle, AutomationId = BaseViewIds.DesiredSizeLabel };
         layout.Add(PropertyPageHelpers.CreateStackedEntryRow("Desired Size", desiredSizeLabel));
 
-        var frameLabel = new Label { Style = SharedStyles.ValueLabelStyle };
+        var frameLabel = new Label { Style = SharedStyles.ValueLabelStyle, AutomationId = BaseViewIds.FrameLabel };
         layout.Add(PropertyPageHelpers.CreateStackedEntryRow("Frame", frameLabel));
     }
 
