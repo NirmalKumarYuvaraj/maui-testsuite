@@ -1,4 +1,5 @@
 using System;
+using TestSuite.AutomationIds;
 using TestSuite.ViewModels;
 using TestSuite.ViewModels.Base;
 using TestSuite.Views.Base;
@@ -21,6 +22,7 @@ public class SwitchPropertiesPage : ContentPage
         Button navigateToViewPropertiesButton = new Button
         {
             Text = "Navigate to Switch View Properties Page",
+            AutomationId = SwitchIds.NavigateToViewPropertiesButton,
             Command = new Command(async () =>
             {
                 await Navigation.PushAsync(new BaseViewPropertiesPage(_viewModel!));
@@ -43,7 +45,10 @@ public class SwitchPropertiesPage : ContentPage
         ToolbarItems.Add(new ToolbarItem("Apply", null, async () =>
         {
             await Navigation.PopToRootAsync();
-        }));
+        })
+        {
+            AutomationId = SwitchIds.ApplyToolbarItem
+        });
     }
 
 }

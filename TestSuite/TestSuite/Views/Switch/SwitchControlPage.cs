@@ -1,4 +1,5 @@
 using System;
+using TestSuite.AutomationIds;
 using TestSuite.ViewModels;
 
 namespace TestSuite.Views;
@@ -16,7 +17,7 @@ public class SwitchNavPage : NavigationPage
 public class SwitchControlPage : ContentPage
 {
     readonly SwitchViewModel? _viewModel;
-    readonly Switch TestSwitch = new Switch();
+    readonly Switch TestSwitch = new Switch { AutomationId = SwitchIds.Control };
 
     public SwitchControlPage()
     {
@@ -49,6 +50,9 @@ public class SwitchControlPage : ContentPage
         ToolbarItems.Add(new ToolbarItem("Options", null, async () =>
         {
             await Navigation.PushAsync(new SwitchPropertiesPage(_viewModel));
-        }));
+        })
+        {
+            AutomationId = SwitchIds.OptionsToolbarItem
+        });
     }
 }

@@ -17,6 +17,9 @@
 
   <ItemGroup>
 	<Compile Include="..\UITests.Shared\**\*.cs" LinkBase="Shared" Visible="false" />
+	<!-- Links the host app's AutomationId constants directly (no ProjectReference)
+	     so page objects and the app can never drift on a locator string. -->
+	<Compile Include="..\TestSuite\AutomationIds\**\*.cs" LinkBase="AutomationIds" Visible="false" />
   </ItemGroup>
 
 </Project>

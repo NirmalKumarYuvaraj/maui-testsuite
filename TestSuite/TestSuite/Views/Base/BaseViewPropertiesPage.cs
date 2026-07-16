@@ -1,3 +1,4 @@
+using TestSuite.AutomationIds;
 using TestSuite.Helper;
 using TestSuite.ViewModels.Base;
 
@@ -46,6 +47,7 @@ public class BaseViewPropertiesPage : ContentPage
         ToolbarItems.Add(new ToolbarItem
         {
             Text = "Apply",
+            AutomationId = BaseViewIds.ApplyToolbarItem,
             Command = new Command(async () => await Navigation.PopToRootAsync())
         });
     }
@@ -102,7 +104,7 @@ public class BaseViewPropertiesPage : ContentPage
         var stack = new VerticalStackLayout { Spacing = 0 };
         stack.Add(CreateSectionHeader("APPEARANCE"));
 
-        var opacityEntry = new Entry();
+        var opacityEntry = new Entry { AutomationId = BaseViewIds.OpacityEntry };
         opacityEntry.TextChanged += OnOpacityChanged;
         stack.Add(PropertyPageHelpers.CreateStackedEntryRow("Opacity (0 to 1)", opacityEntry));
 
@@ -119,7 +121,7 @@ public class BaseViewPropertiesPage : ContentPage
 
         layout.Add(CreateSectionHeader("BEHAVIOR"));
 
-        var isEnabledSwitch = new Switch();
+        var isEnabledSwitch = new Switch { AutomationId = BaseViewIds.IsEnabledSwitch };
         isEnabledSwitch.SetBinding(Switch.IsToggledProperty, nameof(BaseViewModel.IsEnabled));
         behaviorLayout.Add(PropertyPageHelpers.CreateStackedEntryRow("Is Enabled", isEnabledSwitch));
 
@@ -127,7 +129,7 @@ public class BaseViewPropertiesPage : ContentPage
         inputTransparentSwitch.SetBinding(Switch.IsToggledProperty, nameof(BaseViewModel.InputTransparent));
         behaviorLayout.Add(PropertyPageHelpers.CreateStackedEntryRow("Input Transparent", inputTransparentSwitch));
 
-        var isVisibleSwitch = new Switch();
+        var isVisibleSwitch = new Switch { AutomationId = BaseViewIds.IsVisibleSwitch };
         isVisibleSwitch.SetBinding(Switch.IsToggledProperty, nameof(BaseViewModel.IsVisible));
         behaviorLayout.Add(PropertyPageHelpers.CreateStackedEntryRow("Is Visible", isVisibleSwitch));
 
