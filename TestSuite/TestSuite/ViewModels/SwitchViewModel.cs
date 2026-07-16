@@ -5,6 +5,10 @@ namespace TestSuite.ViewModels;
 
 public class SwitchViewModel : BaseViewModel
 {
+    public SwitchViewModel(View testView) : base(testView)
+    {
+    }
+
     bool isToggled = false;
     public bool IsToggled
     {

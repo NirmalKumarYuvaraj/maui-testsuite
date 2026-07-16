@@ -13,14 +13,14 @@ public class SwitchNavPage : NavigationPage
     }
 }
 
-
 public class SwitchControlPage : ContentPage
 {
     readonly SwitchViewModel? _viewModel;
+    readonly Switch TestSwitch = new Switch();
 
     public SwitchControlPage()
     {
-        _viewModel = new SwitchViewModel();
+        _viewModel = new SwitchViewModel(TestSwitch);
         BindingContext = _viewModel;
         SetupUI();
     }
@@ -37,10 +37,9 @@ public class SwitchControlPage : ContentPage
         Title = "Switch Control";
 
 
-        var CustomSwitch = new Switch();
-        CustomSwitch.SetBinding(Switch.IsEnabledProperty, nameof(SwitchViewModel.IsEnabled), BindingMode.TwoWay);
-        CustomSwitch.SetBinding(Switch.IsToggledProperty, nameof(SwitchViewModel.IsToggled));
-        layout.Children.Add(CustomSwitch);
+        TestSwitch.SetBinding(Switch.IsEnabledProperty, nameof(SwitchViewModel.IsEnabled), BindingMode.TwoWay);
+        TestSwitch.SetBinding(Switch.IsToggledProperty, nameof(SwitchViewModel.IsToggled));
+        layout.Children.Add(TestSwitch);
 
         Content = layout;
     }

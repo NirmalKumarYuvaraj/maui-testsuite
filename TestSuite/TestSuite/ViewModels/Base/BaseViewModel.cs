@@ -5,7 +5,7 @@ namespace TestSuite.ViewModels.Base;
 
 public class BaseViewModel : INotifyPropertyChanged
 {
-    bool isEnabled = true;
+    bool isEnabled;
 
     public bool IsEnabled
     {
@@ -18,6 +18,11 @@ public class BaseViewModel : INotifyPropertyChanged
                 OnPropertyChanged(nameof(IsEnabled));
             }
         }
+    }
+
+    public BaseViewModel(View testView)
+    {
+        isEnabled = testView.IsEnabled;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

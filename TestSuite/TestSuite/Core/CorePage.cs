@@ -228,7 +228,6 @@ public class CorePage : ContentPage
     // convention that throws a NullReferenceException for any page not yet built.
     static readonly Dictionary<string, Func<Page>> _navPageFactories = new()
     {
-        ["ActivityIndicator"] = () => new ActivityIndicatorNavPage(),
         ["Switch"] = () => new SwitchNavPage(),
     };
 

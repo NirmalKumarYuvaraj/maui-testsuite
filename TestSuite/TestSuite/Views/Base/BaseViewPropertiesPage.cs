@@ -105,7 +105,7 @@ public class BaseViewPropertiesPage : ContentPage
             Text = "Apply",
             Command = new Command(async () =>
             {
-                await Navigation.PopAsync();
+                await Navigation.PopToRootAsync();
             })
         });
 
