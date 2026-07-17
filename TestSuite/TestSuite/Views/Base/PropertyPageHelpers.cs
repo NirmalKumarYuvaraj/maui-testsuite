@@ -33,10 +33,6 @@ public static class SharedStyles
 /// </summary>
 public static class PropertyPageHelpers
 {
-    /// <summary>
-    /// Two-column row: label on the left (fixed width), input view on the right (fills remaining space).
-    /// Used by pages that lay out their fields in a single vertical list (Layout & Size, Clip, Shadow).
-    /// </summary>
     public static Grid CreateEntryRow(string text, View view, Thickness padding = default)
     {
         var grid = new Grid

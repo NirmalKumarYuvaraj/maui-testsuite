@@ -3,6 +3,7 @@ using NUnit.Framework;
 using OpenQA.Selenium.Appium;
 using OpenQA.Selenium.Appium.Enums;
 using OpenQA.Selenium.Appium.Mac;
+using UITests.Infrastructure;
 
 namespace UITests;
 
@@ -18,7 +19,7 @@ public class AppiumSetup
 	{
 		// If you started an Appium server manually, make sure to comment out the next line
 		// This line starts a local Appium server for you as part of the test run
-		AppiumServerHelper.StartAppiumLocalServer();
+		AppiumSetupBase.StartServer();
 
 		var macOptions = new AppiumOptions
 		{
@@ -36,14 +37,13 @@ public class AppiumSetup
 		// Note there are many more options that you can use to influence the app under test according to your needs
 
 		driver = new MacDriver(macOptions);
+		AppiumSetupBase.ApplyDefaultTimeouts(driver);
 	}
 
 	[OneTimeTearDown]
 	public void RunAfterAnyTests()
 	{
-		driver?.Quit();
-
-		// If an Appium server was started locally above, make sure we clean it up here
-		AppiumServerHelper.DisposeAppiumLocalServer();
+		// Quits the driver and, if an Appium server was started locally above, cleans it up.
+		AppiumSetupBase.TearDown(driver);
 	}
 }

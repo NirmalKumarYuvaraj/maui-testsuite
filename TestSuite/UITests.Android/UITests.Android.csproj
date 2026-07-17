@@ -6,10 +6,12 @@
     <Nullable>enable</Nullable>
     <IsTestProject>true</IsTestProject>
     <RootNamespace>UITests</RootNamespace>
+    <DefineConstants>$(DefineConstants);UITEST_ANDROID</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Appium.WebDriver" Version="5.0.0-rc.5" />
+    <PackageReference Include="SkiaSharp" Version="4.150.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
     <PackageReference Include="NUnit" Version="4.0.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
@@ -17,6 +19,18 @@
 
   <ItemGroup>
 	<Compile Include="..\UITests.Shared\**\*.cs" LinkBase="Shared" Visible="false" />
+	<!-- Links the host app's AutomationId constants directly (no ProjectReference)
+	     so page objects and the app can never drift on a locator string. -->
+	<Compile Include="..\TestSuite\AutomationIds\**\*.cs" LinkBase="AutomationIds" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Committed visual-regression baselines; copied to the output directory
+         so ScreenshotManager (which resolves paths relative to the test run's
+         working directory) can find them at runtime. -->
+    <Content Include="Screenshots\Baseline\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
