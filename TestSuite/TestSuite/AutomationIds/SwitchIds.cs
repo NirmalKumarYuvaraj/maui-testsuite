@@ -14,4 +14,10 @@ public static class SwitchIds
     public const string OptionsToolbarItem = "Switch.Options";
     public const string ApplyToolbarItem = "Switch.Apply";
     public const string NavigateToViewPropertiesButton = "Switch.NavigateToViewProperties";
+
+    // Switch-specific properties
+    public const string IsToggledSwitch = "Switch.IsToggled";
+    public const string OnColorEntry = "Switch.OnColor";
+    public const string OffColorEntry = "Switch.OffColor";
+    public const string ThumbColorEntry = "Switch.ThumbColor";
 }

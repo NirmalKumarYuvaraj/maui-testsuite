@@ -1,5 +1,8 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Appium;
+using OpenQA.Selenium.Appium.Android;
+using OpenQA.Selenium.Appium.iOS;
+using OpenQA.Selenium.Appium.Mac;
 using OpenQA.Selenium.Appium.Windows;
 using UITests.Infrastructure;
 
@@ -61,6 +64,31 @@ public abstract class BasePage
     /// <summary>Waits for an arbitrary condition (e.g. a bound label's text updating).</summary>
     protected bool WaitForCondition(Func<bool> condition, TimeSpan? timeout = null)
         => WaitHelper.WaitUntil(condition, timeout);
+
+    /// <summary>
+    /// Reads the on/off state of a MAUI <c>Switch</c> (or other checkable
+    /// toggle control) identified by <paramref name="automationId"/>.
+    /// <para>
+    /// Don't use <see cref="AppiumElement.Selected"/> for this: despite the
+    /// W3C WebDriver spec saying "selected" applies to toggle buttons, in
+    /// practice UIAutomator2 maps it to the native <c>View.isSelected()</c>
+    /// state (unrelated to a Switch's checked/toggle state) and it never
+    /// changes when the Switch is toggled, while XCUITest only exposes the
+    /// toggle's actual on/off state via the element's "value" attribute.
+    /// Read the platform-appropriate attribute instead.
+    /// </para>
+    /// </summary>
+    protected bool IsToggleOn(string automationId)
+    {
+        var element = WaitForElement(automationId);
+
+        return App switch
+        {
+            IOSDriver or MacDriver => element.GetAttribute("value") is "1" or "true",
+            WindowsDriver => element.Selected,
+            _ => element.GetAttribute("checked") is "true",
+        };
+    }
 
     protected void TakeScreenshot(string name)
         => ScreenshotManager.Capture(App, name);

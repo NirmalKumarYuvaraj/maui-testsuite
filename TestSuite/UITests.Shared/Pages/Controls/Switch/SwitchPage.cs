@@ -1,9 +1,10 @@
 using OpenQA.Selenium;
 using TestSuite.AutomationIds;
 using UITests.Core;
+using UITests.Pages.Controls.Switch;
 using HomePage = UITests.Pages.Home.CorePage;
 
-namespace UITests.Pages.Controls.Switch;
+namespace UITests.Pages.Controls;
 
 /// <summary>
 /// Page Object for <c>TestSuite/Views/Switch/SwitchControlPage.cs</c>.
@@ -37,7 +38,18 @@ public class SwitchPage : BasePage
     }
 
     /// <summary>Current toggled state of the Switch control under test.</summary>
-    public bool IsToggled => WaitForElement(SwitchIds.Control).Selected;
+    public bool IsToggled => IsToggleOn(SwitchIds.Control);
+
+    /// <summary>
+    /// Whether the Switch control under test is currently enabled. Backed by
+    /// the standard WebDriver "enabled" element state (<see cref="OpenQA.Selenium.IWebElement.Enabled"/>),
+    /// which — unlike <c>Selected</c> for toggle state (see
+    /// <see cref="UITests.Core.BasePage.IsToggleOn"/>) — is consistently
+    /// wired to the native enabled/disabled state across UIAutomator2,
+    /// XCUITest and the Windows driver, so no per-platform branching is
+    /// needed here.
+    /// </summary>
+    public bool IsEnabled => WaitForElement(SwitchIds.Control).Enabled;
 
     /// <summary>Toggles the Switch control and waits for the new state to be reflected.</summary>
     public void Toggle()
@@ -47,6 +59,15 @@ public class SwitchPage : BasePage
         FindElement(SwitchIds.Control).Click();
         WaitForCondition(() => IsToggled != wasToggled);
     }
+
+    /// <summary>
+    /// Clicks the Switch without waiting for its state to flip. Use this
+    /// (instead of <see cref="Toggle"/>) only when asserting that a click
+    /// should have <b>no</b> effect (e.g. a disabled Switch) — waiting via
+    /// <see cref="Toggle"/> there would always run out its full timeout
+    /// polling for a flip that's expected to never happen.
+    /// </summary>
+    public void AttemptToggle() => FindElement(SwitchIds.Control).Click();
 
     /// <summary>Navigates to the Switch's "Options" (properties) page.</summary>
     public SwitchPropertiesPage OpenOptions()

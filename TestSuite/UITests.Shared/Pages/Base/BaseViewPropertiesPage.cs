@@ -54,6 +54,16 @@ public class BaseViewPropertiesPage : BasePage
     public string FrameText => WaitForElement(BaseViewIds.FrameLabel).Text;
 
     /// <summary>
+    /// Current text in the Opacity entry. Exposed so callers can verify a
+    /// <see cref="SetOpacity"/> call actually took (i.e. the field accepted
+    /// the typed value) <em>before</em> hitting Apply and asserting on
+    /// downstream behavior — asserting on behavior alone can't distinguish
+    /// "the property really changed" from "the arrange step silently did
+    /// nothing and the behavior would've held anyway".
+    /// </summary>
+    public string OpacityText => WaitForElement(BaseViewIds.OpacityEntry).Text;
+
+    /// <summary>
     /// Applies changes. The host app's "Apply" toolbar item calls
     /// <c>Navigation.PopToRootAsync()</c>, which returns to whichever
     /// control's <c>ControlPage</c> is the root of the current
@@ -73,8 +83,7 @@ public class BaseViewPropertiesPage : BasePage
 
     void SetSwitch(string automationId, bool desiredState)
     {
-        var toggle = WaitForElement(automationId);
-        if (toggle.Selected != desiredState)
-            toggle.Click();
+        if (IsToggleOn(automationId) != desiredState)
+            FindElement(automationId).Click();
     }
 }
