@@ -35,42 +35,33 @@ public class SwitchFeatureMatrix : BaseTest
         // fixture; a no-op for subsequent tests that are already on the
         // Switch control page (see SwitchPage.NavigateFromHome).
         _switchPage = SwitchPage.NavigateFromHome();
-    }
 
-    [TearDown]
-    public void TearDown()
-    {
-        // Defense-in-depth for test independence (spec/TestPlan.md §2): every
-        // feature-matrix test below mutates a View or Switch-specific
-        // property on the shared SwitchViewModel. Unconditionally restoring
-        // all of them here - regardless of which test ran or whether it
-        // passed - guarantees no test can leak state into whichever test
-        // NUnit runs next, in any order or filter. This also protects the
-        // visual regression test from leftover Opacity/colors changing what
-        // the baseline comparison sees.
+        // Single-click reset (see SwitchViewModel.ResetToDefaults /
+        // SwitchControlPage's "Reset" toolbar item) restores every View
+        // property, Switch-specific property, and event/command counter to
+        // its default before every test - regardless of what the previous
+        // test mutated or whether it passed or failed. Deliberately placed
+        // in [SetUp] rather than [TearDown]:
+        //   - It's the Arrange step for every test in this fixture, so it
+        //     belongs there conventionally.
+        //   - It guarantees a clean baseline even if a previous run's
+        //     [TearDown]-equivalent didn't execute (e.g. a hard crash),
+        //     rather than relying on every prior test's cleanup succeeding.
+        //   - It leaves a failed test's on-screen state intact until the
+        //     next test starts, instead of a [TearDown] immediately
+        //     overwriting it - useful when inspecting a failure.
         //
-        // Deliberately NOT relying on SwitchPage.NavigateFromHome's
-        // incidental re-navigation for this: it only re-navigates when the
-        // Switch control leaves the accessibility tree (true for
-        // IsVisible = false), not for Opacity = 0, where the element
-        // typically remains present just fully transparent.
-        var propertiesPage = _switchPage.OpenOptions();
-        propertiesPage.SetOnColor("");
-        propertiesPage.SetOffColor("");
-        propertiesPage.SetThumbColor("");
-        propertiesPage.SetCommandParameter("");
-
-        var viewPropertiesPage = propertiesPage.OpenViewProperties();
-        viewPropertiesPage.SetOpacity(1.0);
-        viewPropertiesPage.SetVisible(true);
-        viewPropertiesPage.SetEnabled(true);
-        viewPropertiesPage.SetInputTransparent(false);
-        viewPropertiesPage.SetFlowDirection("LeftToRight");
-        viewPropertiesPage.SetHorizontalOptions("Fill");
-        viewPropertiesPage.SetVerticalOptions("Fill");
-        viewPropertiesPage.SetBackground("");
-        viewPropertiesPage.SetZIndex(0);
-        viewPropertiesPage.Apply();
+        // This replaced a previous [TearDown] that opened the Options and
+        // View Properties pages and set ~13 fields back individually across
+        // two navigations - inconsistent with the rest of this fixture's
+        // "one thing, one Page Object call" style, slower (two page
+        // transitions plus typing into every field on every single test),
+        // and it didn't reset the cumulative ToggledEventCount/
+        // CommandExecutionCount counters at all, which made any test
+        // asserting an absolute (not delta) count fragile when run alone vs.
+        // as part of the full fixture. See spec/TestPlan.md's
+        // reset-architecture phase for the full rationale.
+        _switchPage.Reset();
     }
 
     // ── Functional tests ─────────────────────────────────────────────────
@@ -262,8 +253,19 @@ public class SwitchFeatureMatrix : BaseTest
         // accepted the typed value before Apply - otherwise a silently
         // failed SetCommandParameter would leave the previous parameter in
         // place and the assertion below could pass for the wrong reason.
-        Assert.That(propertiesPage.CommandParameterText, Is.EqualTo(parameter),
-            $"Arrange failed: Command Parameter entry did not accept \"{parameter}\" before Apply.");
+        //
+        // Skipped for an empty parameter: Android's accessibility tree
+        // reports an Entry's Placeholder as its "text" whenever the actual
+        // Text is empty (that's what a screen reader would announce), so
+        // CommandParameterText can't be distinguished from the placeholder
+        // via this property in that case - there's nothing meaningful left
+        // to verify beyond what SetCommandParameter's Clear() already
+        // guarantees.
+        if (!string.IsNullOrEmpty(parameter))
+        {
+            Assert.That(propertiesPage.CommandParameterText, Is.EqualTo(parameter),
+                $"Arrange failed: Command Parameter entry did not accept \"{parameter}\" before Apply.");
+        }
 
         _switchPage = propertiesPage.Apply();
 

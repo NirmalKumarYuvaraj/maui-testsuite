@@ -25,17 +25,43 @@ public class SwitchPage : BasePage
     /// there's no way back to home once here — this is a no-op if a previous
     /// test in the same fixture already navigated here. Call this from
     /// <c>[SetUp]</c> instead of <c>new SwitchPage()</c> directly.
+    /// <para>
+    /// If a previous test threw (e.g. an Arrange-verification assertion)
+    /// while the Options or View Properties page was still open - before
+    /// its own <c>Apply()</c> ran - the app is left on that nested page
+    /// rather than back on this control page or on Home. Since Home isn't
+    /// reachable from a nested page, first try to recover by clicking
+    /// whichever "Apply" toolbar item is present (both pop straight back to
+    /// this page's root via <c>Navigation.PopToRootAsync()</c>, regardless
+    /// of nesting depth - see <see cref="SwitchPropertiesPage.Apply"/> /
+    /// <c>BaseViewPropertiesPage.Apply</c>) before falling back to Home's
+    /// search.
+    /// </para>
     /// </summary>
     public static SwitchPage NavigateFromHome()
     {
         var switchPage = new SwitchPage();
-        if (!switchPage.IsDisplayed)
-        {
-            new HomePage().Search("Switch");
-            switchPage = new SwitchPage();
-        }
+        if (switchPage.IsDisplayed)
+            return switchPage;
 
-        return switchPage;
+        switchPage.RecoverFromNestedPage();
+        if (switchPage.IsDisplayed)
+            return switchPage;
+
+        new HomePage().Search("Switch");
+        return new SwitchPage();
+    }
+
+    /// <summary>
+    /// Clicks whichever nested page's "Apply" toolbar item is currently on
+    /// screen (Options' or View Properties'), if any, to recover back to
+    /// this control page without going through Home. No-op if neither is
+    /// present (e.g. the app is already on Home, or on this page).
+    /// </summary>
+    void RecoverFromNestedPage()
+    {
+        var applyButton = TryFindElement(SwitchIds.ApplyToolbarItem) ?? TryFindElement(BaseViewIds.ApplyToolbarItem);
+        applyButton?.Click();
     }
 
     /// <summary>Current toggled state of the Switch control under test.</summary>
@@ -76,6 +102,17 @@ public class SwitchPage : BasePage
         FindElement(SwitchIds.OptionsToolbarItem).Click();
         return new SwitchPropertiesPage();
     }
+
+    /// <summary>
+    /// Restores every property and event/command counter on this control
+    /// page back to its default in a single click, with no page navigation
+    /// - backed by <c>SwitchViewModel.ResetToDefaults()</c>. This is the
+    /// only reset mechanism feature-matrix tests should use (call from
+    /// <c>[SetUp]</c>); do not reconstruct the same effect by manually
+    /// navigating through Options/View Properties and setting each field
+    /// back individually (spec/TestPlan.md's reset-architecture phase).
+    /// </summary>
+    public void Reset() => FindElement(SwitchIds.ResetToolbarItem).Click();
 
     // ── Description ──────────────────────────────────────────────────────
 

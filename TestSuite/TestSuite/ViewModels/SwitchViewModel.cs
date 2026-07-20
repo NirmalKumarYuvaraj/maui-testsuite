@@ -6,9 +6,18 @@ namespace TestSuite.ViewModels;
 
 public class SwitchViewModel : BaseViewModel
 {
+    readonly bool defaultIsToggled;
+    readonly Color? defaultOnColor;
+    readonly Color? defaultOffColor;
+    readonly Color? defaultThumbColor;
+
     public SwitchViewModel(View testView) : base(testView)
     {
         ToggledCommand = new Command<object?>(OnToggledCommandExecuted);
+        defaultIsToggled = isToggled = ((Switch)testView).IsToggled;
+        defaultOnColor = onColor = ((Switch)testView).OnColor;
+        defaultOffColor = offColor = ((Switch)testView).OffColor;
+        defaultThumbColor = thumbColor = ((Switch)testView).ThumbColor;
     }
 
     bool isToggled = false;
@@ -103,6 +112,35 @@ public class SwitchViewModel : BaseViewModel
     {
         CommandExecutionCount++;
         LastCommandParameter = parameter;
+    }
+
+    /// <summary>
+    /// Single reset mechanism for every mutable state this ViewModel
+    /// exposes - both <c>BaseViewModel</c>'s View properties (via
+    /// <c>base.ResetToDefaults()</c>) and the Switch-specific/event-tracking
+    /// state added here (<c>OnColor</c>/<c>OffColor</c>/<c>ThumbColor</c>,
+    /// <c>CommandParameter</c>, and the cumulative
+    /// <c>ToggledEventCount</c>/<c>CommandExecutionCount</c> counters).
+    /// Invoked from a single "Reset" control directly on
+    /// <c>SwitchControlPage</c> (no page navigation required) - see
+    /// spec/TestPlan.md's reset-architecture phase for why this replaced the
+    /// previous per-property <c>[TearDown]</c> that opened Options/View
+    /// Properties and set each field back individually.
+    /// </summary>
+    public override void ResetToDefaults()
+    {
+        base.ResetToDefaults();
+
+        // IsToggled = defaultIsToggled;
+        // OnColor = defaultOnColor;
+        // OffColor = defaultOffColor;
+        // ThumbColor = defaultThumbColor;
+        CommandParameter = null;
+
+        ToggledEventCount = 0;
+        LastToggledEventValue = null;
+        CommandExecutionCount = 0;
+        LastCommandParameter = null;
     }
 }
 

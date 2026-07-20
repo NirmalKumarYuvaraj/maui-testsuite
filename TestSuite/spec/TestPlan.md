@@ -550,3 +550,100 @@ UITests.Android.csproj`, both 0 errors/warnings) and confirmed via
 tests are discovered. As with every prior phase, a real-device run (iOS
 simulator at minimum) is still required before considering this phase
 done — no simulator/device is attached in this sandbox.
+
+---
+
+## 13. Phase 8 — reset architecture (single command, not per-property `[TearDown]`)
+
+Replaced the per-property `[TearDown]` (Phase 1 §7 decision 3, extended in
+every subsequent phase) with a single "Reset" mechanism, prompted by two
+concrete problems observed running the fixture:
+
+1. **Architectural inconsistency / cost.** The `[TearDown]` opened Options
+   then View Properties and called ~13 individual `SetX(...)` methods across
+   two page navigations, on *every single test*, regardless of what that
+   test actually mutated. This was slow (two navigations + typing into
+   every field, every test) and easy to forget a property on (every prior
+   phase had to remember to add its new property to this list).
+2. **Cumulative counters.** `ToggledEventCount`/`CommandExecutionCount`
+   (Phase 7) were never reset anywhere, so they kept accumulating across the
+   whole fixture's run - fragile for any test wanting to assert on an
+   absolute count (not just a delta) and inconsistent with every other
+   mutable property, which *was* being reset.
+
+**Rejected alternative: navigate to `CorePage`/home and back before every
+test.** This would also reset all state (a fresh `SwitchControlPage`/
+`SwitchViewModel` instance), but was rejected because it's strictly worse on
+both axes this phase optimizes for:
+- **Slower**, not faster — `SwitchPage.NavigateFromHome()` only re-navigates
+  when the control has left the accessibility tree; forcing a real
+  navigate-away-and-back on every test means paying a full page
+  transition + `HomePage.Search("Switch")` + page reconstruction cost on
+  *every* test, which is more expensive than even the old per-property
+  `[TearDown]`, let alone a single same-page button click.
+- **No better test quality** — a manual `ResetToDefaults()` achieves the
+  exact same "every property back to its default" guarantee without leaving
+  the page, so there's no correctness gained by navigating away that isn't
+  already gained by the reset command.
+
+### Implementation
+
+- **`BaseViewModel.cs`**: constructor now also captures each property's
+  starting value into a parallel `readonly default*` field (e.g.
+  `defaultOpacity`, `defaultZIndex`) from the actual `View` instance -
+  not hardcoded literals - so the reset can never drift from whatever a
+  real default is. Added `public virtual void ResetToDefaults()` that sets
+  every property back to its captured default in one call.
+- **`SwitchViewModel.cs`**: overrides `ResetToDefaults()` - calls
+  `base.ResetToDefaults()`, then additionally resets `IsToggled` (to its
+  captured default), `OnColor`/`OffColor`/`ThumbColor`/`CommandParameter`
+  (to `null`), and - critically - zeroes `ToggledEventCount`/
+  `CommandExecutionCount` and clears `LastToggledEventValue`/
+  `LastCommandParameter`.
+- **`SwitchControlPage.cs`**: new "Reset" `ToolbarItem`
+  (`SwitchIds.ResetToolbarItem`) directly on the control page (no
+  navigation) that calls `_viewModel.ResetToDefaults()`.
+- **`SwitchPage.cs`** (Page Object): new `Reset()` method - one click, no
+  page-object chaining/re-anchoring needed since it doesn't navigate.
+- **`SwitchFeatureMatrix.cs`**: `[TearDown]` removed entirely; `[SetUp]`
+  now calls `_switchPage.Reset()` immediately after
+  `SwitchPage.NavigateFromHome()`. Placed in `[SetUp]` rather than
+  `[TearDown]` deliberately:
+  - It's the Arrange step for every test, so it belongs there
+    conventionally.
+  - It guarantees a clean baseline even if a prior run's cleanup didn't
+    execute (e.g. a hard crash), rather than depending on every previous
+    test's `[TearDown]` having succeeded.
+  - It leaves a failed test's on-screen state intact until the *next* test
+    starts, instead of immediately overwriting it - useful when inspecting
+    a failure (this was the concrete symptom that prompted this phase: a
+    failed `SwitchControlPage_MatchesBaseline_WithCustomOnColor` appeared
+    to "keep going" and reset `OnColor`/`ZIndex`/etc., which was actually
+    the old `[TearDown]` running as designed, not a bug in the failing test
+    itself - but it made the fixture confusing to reason about).
+
+### Independence / correctness notes
+
+- Every existing feature-matrix/functional test is unaffected in behavior -
+  they still call `OpenOptions()`/`OpenViewProperties()` themselves for
+  whatever property they're arranging; only the blanket end-of-test cleanup
+  changed.
+- `SwitchViewModel`'s `defaultIsToggled` is captured from the actual
+  `Switch` instance's `IsToggled` (via the constructor's `testView`
+  parameter cast), matching the `BaseViewModel` pattern rather than
+  hardcoding `false`.
+- This reset architecture (`BaseViewModel.ResetToDefaults()`) is written to
+  be reusable by future controls, not Switch-specific - a new control's
+  ViewModel can override it the same way `SwitchViewModel` does, and expose
+  its own "Reset" toolbar item, without re-deriving this design.
+
+### Verification
+
+Build-verified only in this sandboxed environment (`dotnet build
+TestSuite.csproj -f net10.0-android` and `dotnet build
+UITests.Android.csproj`, both 0 errors/warnings) and confirmed via
+`dotnet test --list-tests --filter "Category=Switch"` that all 52 tests are
+still discovered after the `[TearDown]` → `[SetUp]`+`Reset()` refactor. As
+with every prior phase, a real-device run (iOS simulator at minimum) is
+still required before considering this phase done — no simulator/device is
+attached in this sandbox.

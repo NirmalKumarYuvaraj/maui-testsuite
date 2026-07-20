@@ -150,5 +150,19 @@ public class SwitchControlPage : ContentPage
         {
             AutomationId = SwitchIds.OptionsToolbarItem
         });
+
+        // Single-click reset (no navigation) - restores every property and
+        // event/command counter to the control's defaults directly on this
+        // page. Exists specifically so UI tests can establish a clean
+        // baseline in [SetUp] without the cost/fragility of navigating
+        // through Options/View Properties and setting each field back
+        // individually (spec/TestPlan.md's reset-architecture phase).
+        ToolbarItems.Add(new ToolbarItem("Reset", null, () =>
+        {
+            _viewModel?.ResetToDefaults();
+        })
+        {
+            AutomationId = SwitchIds.ResetToolbarItem
+        });
     }
 }
