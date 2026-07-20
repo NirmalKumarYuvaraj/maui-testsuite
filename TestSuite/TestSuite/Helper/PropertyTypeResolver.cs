@@ -91,4 +91,13 @@ public static class PropertyHelperExtensions
         }
     }
 
+    public static Color? ToSwitchColor(string? colorString)
+    {
+        if (string.IsNullOrWhiteSpace(colorString))
+            return null;
+
+        try { return Color.FromArgb(colorString); }
+        catch { return null; }
+    }
+
 }

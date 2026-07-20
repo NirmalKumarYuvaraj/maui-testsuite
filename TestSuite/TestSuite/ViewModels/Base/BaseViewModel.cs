@@ -225,43 +225,127 @@ public class BaseViewModel : INotifyPropertyChanged
         set { if (isFocused != value) { isFocused = value; OnPropertyChanged(); } }
     }
 
+    // ── Reset-to-defaults snapshot ────────────────────────────────────────────
+    //
+    // Captured once, at construction, from the actual View instance under
+    // test - not hardcoded literals (e.g. "LeftToRight") - so ResetToDefaults
+    // can never drift from whatever MAUI's real default for a given property
+    // actually is. This backs a single, reusable "reset everything" operation
+    // for feature-matrix tests (spec/TestPlan.md's reset-architecture phase)
+    // instead of every test/TearDown having to know and set each property's
+    // default individually.
+    readonly LayoutOptions defaultHorizontalOptions;
+    readonly LayoutOptions defaultVerticalOptions;
+    readonly FlowDirection defaultFlowDirection;
+    readonly double defaultOpacity;
+    readonly bool defaultIsVisible;
+    readonly Brush? defaultBackground;
+    readonly bool defaultIsEnabled;
+    readonly bool defaultInputTransparent;
+    readonly int defaultZIndex;
+    readonly Shadow? defaultShadow;
+    readonly Geometry? defaultClip;
+    readonly double defaultWidthRequest;
+    readonly double defaultHeightRequest;
+    readonly double defaultMinimumWidthRequest;
+    readonly double defaultMinimumHeightRequest;
+    readonly double defaultMaximumWidthRequest;
+    readonly double defaultMaximumHeightRequest;
+    readonly Thickness defaultMargin;
+    readonly double defaultTranslationX;
+    readonly double defaultTranslationY;
+    readonly double defaultRotation;
+    readonly double defaultRotationX;
+    readonly double defaultRotationY;
+    readonly double defaultScale;
+    readonly double defaultScaleX;
+    readonly double defaultScaleY;
+    readonly double defaultAnchorX;
+    readonly double defaultAnchorY;
+
     // ── Constructor ──────────────────────────────────────────────────────────
     public BaseViewModel(View testView)
     {
-        horizontalOptions = testView.HorizontalOptions;
-        verticalOptions = testView.VerticalOptions;
-        flowDirection = testView.FlowDirection;
+        horizontalOptions = defaultHorizontalOptions = testView.HorizontalOptions;
+        verticalOptions = defaultVerticalOptions = testView.VerticalOptions;
+        flowDirection = defaultFlowDirection = testView.FlowDirection;
 
-        opacity = testView.Opacity;
-        isVisible = testView.IsVisible;
-        background = testView.Background;
+        opacity = defaultOpacity = testView.Opacity;
+        isVisible = defaultIsVisible = testView.IsVisible;
+        background = defaultBackground = testView.Background;
 
-        isEnabled = testView.IsEnabled;
-        inputTransparent = testView.InputTransparent;
+        isEnabled = defaultIsEnabled = testView.IsEnabled;
+        inputTransparent = defaultInputTransparent = testView.InputTransparent;
 
-        zIndex = testView.ZIndex;
-        shadow = testView.Shadow;
-        clip = testView.Clip;
+        zIndex = defaultZIndex = testView.ZIndex;
+        shadow = defaultShadow = testView.Shadow;
+        clip = defaultClip = testView.Clip;
 
-        widthRequest = testView.WidthRequest;
-        heightRequest = testView.HeightRequest;
-        minimumWidthRequest = testView.MinimumWidthRequest;
-        minimumHeightRequest = testView.MinimumHeightRequest;
-        maximumWidthRequest = testView.MaximumWidthRequest;
-        maximumHeightRequest = testView.MaximumHeightRequest;
-        margin = testView.Margin;
+        widthRequest = defaultWidthRequest = testView.WidthRequest;
+        heightRequest = defaultHeightRequest = testView.HeightRequest;
+        minimumWidthRequest = defaultMinimumWidthRequest = testView.MinimumWidthRequest;
+        minimumHeightRequest = defaultMinimumHeightRequest = testView.MinimumHeightRequest;
+        maximumWidthRequest = defaultMaximumWidthRequest = testView.MaximumWidthRequest;
+        maximumHeightRequest = defaultMaximumHeightRequest = testView.MaximumHeightRequest;
+        margin = defaultMargin = testView.Margin;
 
-        translationX = testView.TranslationX;
-        translationY = testView.TranslationY;
-        rotation = testView.Rotation;
-        rotationX = testView.RotationX;
-        rotationY = testView.RotationY;
-        scale = testView.Scale;
-        scaleX = testView.ScaleX;
-        scaleY = testView.ScaleY;
-        anchorX = testView.AnchorX;
-        anchorY = testView.AnchorY;
+        translationX = defaultTranslationX = testView.TranslationX;
+        translationY = defaultTranslationY = testView.TranslationY;
+        rotation = defaultRotation = testView.Rotation;
+        rotationX = defaultRotationX = testView.RotationX;
+        rotationY = defaultRotationY = testView.RotationY;
+        scale = defaultScale = testView.Scale;
+        scaleX = defaultScaleX = testView.ScaleX;
+        scaleY = defaultScaleY = testView.ScaleY;
+        anchorX = defaultAnchorX = testView.AnchorX;
+        anchorY = defaultAnchorY = testView.AnchorY;
         isFocused = testView.IsFocused;
+    }
+
+    /// <summary>
+    /// Restores every <c>BaseViewModel</c> property to the value captured
+    /// from the actual View at construction time - the single reset
+    /// mechanism feature-matrix tests should call (via a host-app Reset
+    /// command, see <c>SwitchViewModel.ResetToDefaults</c>/<c>SwitchControlPage</c>)
+    /// instead of setting each property back individually. Overridden by
+    /// derived ViewModels to additionally reset their own control-specific
+    /// properties/counters.
+    /// </summary>
+    public virtual void ResetToDefaults()
+    {
+        HorizontalOptions = defaultHorizontalOptions;
+        VerticalOptions = defaultVerticalOptions;
+        FlowDirection = defaultFlowDirection;
+
+        Opacity = defaultOpacity;
+        IsVisible = defaultIsVisible;
+        Background = defaultBackground;
+
+        IsEnabled = defaultIsEnabled;
+        InputTransparent = defaultInputTransparent;
+
+        ZIndex = defaultZIndex;
+        Shadow = defaultShadow;
+        Clip = defaultClip;
+
+        WidthRequest = defaultWidthRequest;
+        HeightRequest = defaultHeightRequest;
+        MinimumWidthRequest = defaultMinimumWidthRequest;
+        MinimumHeightRequest = defaultMinimumHeightRequest;
+        MaximumWidthRequest = defaultMaximumWidthRequest;
+        MaximumHeightRequest = defaultMaximumHeightRequest;
+        Margin = defaultMargin;
+
+        TranslationX = defaultTranslationX;
+        TranslationY = defaultTranslationY;
+        Rotation = defaultRotation;
+        RotationX = defaultRotationX;
+        RotationY = defaultRotationY;
+        Scale = defaultScale;
+        ScaleX = defaultScaleX;
+        ScaleY = defaultScaleY;
+        AnchorX = defaultAnchorX;
+        AnchorY = defaultAnchorY;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

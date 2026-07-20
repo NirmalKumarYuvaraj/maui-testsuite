@@ -518,6 +518,30 @@ Feature matrix tests verify combinations of common View properties.
 Instead of duplicating property combinations in every control, common property
 sets should be reusable.
 
+A feature-matrix test that mutates a shared property (Opacity, Visibility,
+IsEnabled, etc.) before exercising the control's behavior must verify that
+the mutation actually took effect, before asserting on the behavior. Asserting
+behavior alone can't tell a genuinely-applied property change apart from a
+silently-failed one (e.g. a `SendKeys` that didn't commit, or a binding that
+no-ops) that just happens to leave the control in a state where the same
+behavioral assertion would still pass. See
+`Tests/Controls/Switch/SwitchFeatureMatrix.cs` for the pattern (an
+"arrange verification" assertion — reading the mutated property back via the
+Page Object — immediately after applying the change and before the
+behavioral assertion) and `spec/TestPlan.md` §7.1 for how this was found:
+tests were passing on a real iOS simulator run without actually proving the
+property mutation they were meant to cover.
+
+`Opacity = 0.0` specifically needs a special case wherever
+`Data/OpacityData.cs` is consumed: verified on a real iOS simulator, a fully
+transparent control stays in the accessibility tree (unlike
+`IsVisible = false`) but no longer responds to a tap, because at least iOS's
+native hit-testing excludes views with ~zero alpha. A feature-matrix test
+that assumes "the control's behavior still works at every opacity value"
+will incorrectly fail at `0.0` — assert "no effect" for that value instead,
+the same shape as a disabled control. See `OpacityData.cs`'s doc comment and
+`spec/TestPlan.md` §7.2.
+
 Example shared matrices:
 
 ```

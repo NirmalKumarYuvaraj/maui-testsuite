@@ -203,6 +203,7 @@ public class BaseViewPropertiesPage : ContentPage
 
     void OnBackgroundChanged(object? sender, TextChangedEventArgs e)
     {
+        System.Diagnostics.Debug.WriteLine($"Background changed to: {e.NewTextValue}");
         _viewModel?.Background = PropertyHelperExtensions.ToColor(e.NewTextValue);
     }
 

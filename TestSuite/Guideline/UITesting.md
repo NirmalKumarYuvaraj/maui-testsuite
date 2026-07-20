@@ -327,3 +327,13 @@ files automatically.
   `NoReset=true` is set (already default in `UITests.Android/AppiumSetup.cs`)
   since Appium is incompatible with Fast Deployment; use a Release build +
   explicit `.apk` path if you must disable `NoReset`.
+- **`NETSDK1005: ... doesn't have a target for 'net10.0-ios'/'net10.0-android'`
+  when building a `UITests.<Platform>` project** — that platform's SDK/
+  workload assets haven't been restored for this machine/environment
+  (common on a sandboxed dev machine without the iOS/Android SDKs fully set
+  up); it's an environment issue, not a code issue. Since `UITests.Shared`
+  is linked identically into all four platform heads, `dotnet build
+  UITests.macOS/UITests.macOS.csproj -f net10.0` is the cheapest way to
+  syntax/type-check a `UITests.Shared` change when the other three platform
+  projects won't restore locally — it still doesn't substitute for actually
+  running the tests (§4) on a real target before committing.
