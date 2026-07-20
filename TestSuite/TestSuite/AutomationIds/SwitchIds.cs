@@ -20,4 +20,14 @@ public static class SwitchIds
     public const string OnColorEntry = "Switch.OnColor";
     public const string OffColorEntry = "Switch.OffColor";
     public const string ThumbColorEntry = "Switch.ThumbColor";
+
+    // Description
+    public const string DescriptionLabel = "Switch.Description";
+
+    // Event/Command diagnostics
+    public const string ToggledEventCountLabel = "Switch.ToggledEventCount";
+    public const string LastToggledValueLabel = "Switch.LastToggledValue";
+    public const string CommandExecutionCountLabel = "Switch.CommandExecutionCount";
+    public const string LastCommandParameterLabel = "Switch.LastCommandParameter";
+    public const string CommandParameterEntry = "Switch.CommandParameterEntry";
 }

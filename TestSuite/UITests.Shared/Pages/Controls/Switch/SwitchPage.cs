@@ -1,4 +1,5 @@
 using OpenQA.Selenium;
+using System.Globalization;
 using TestSuite.AutomationIds;
 using UITests.Core;
 using UITests.Pages.Controls.Switch;
@@ -75,4 +76,44 @@ public class SwitchPage : BasePage
         FindElement(SwitchIds.OptionsToolbarItem).Click();
         return new SwitchPropertiesPage();
     }
+
+    // ── Description ──────────────────────────────────────────────────────
+
+    /// <summary>Static text describing what this control page exercises.</summary>
+    public string Description => WaitForElement(SwitchIds.DescriptionLabel).Text;
+
+    // ── Toggled event / Command diagnostics ─────────────────────────────
+    //
+    // Microsoft.Maui.Controls.Switch has no Command/CommandParameter of its
+    // own - these labels are populated manually by SwitchControlPage's
+    // Toggled event handler (see TestSuite/Views/Switch/SwitchControlPage.cs),
+    // which is the only way to make "did a Command fire in response to user
+    // interaction" observable/testable for this control.
+
+    /// <summary>
+    /// Number of times the native <c>Toggled</c> event has fired on the
+    /// Switch control under test since the page was created.
+    /// </summary>
+    public int ToggledEventCount => int.Parse(WaitForElement(SwitchIds.ToggledEventCountLabel).Text, CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// The <c>ToggledEventArgs.Value</c> from the most recent <c>Toggled</c>
+    /// event, as rendered text ("True"/"False", or empty before any toggle
+    /// has occurred).
+    /// </summary>
+    public string LastToggledValueText => WaitForElement(SwitchIds.LastToggledValueLabel).Text;
+
+    /// <summary>
+    /// Number of times <c>SwitchViewModel.ToggledCommand</c> has actually
+    /// executed - distinct from <see cref="ToggledEventCount"/> because it
+    /// proves the Command wiring itself works, not just that the event fired.
+    /// </summary>
+    public int CommandExecutionCount => int.Parse(WaitForElement(SwitchIds.CommandExecutionCountLabel).Text, CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// The parameter <c>ToggledCommand</c> was most recently invoked with -
+    /// should match whatever was set via <see cref="SwitchPropertiesPage.SetCommandParameter"/>
+    /// at the time of the last toggle.
+    /// </summary>
+    public string LastCommandParameterText => WaitForElement(SwitchIds.LastCommandParameterLabel).Text;
 }

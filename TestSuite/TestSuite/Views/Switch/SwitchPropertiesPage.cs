@@ -70,6 +70,10 @@ public class SwitchPropertiesPage : ContentPage
         var thumbColorEntry = new Entry { Placeholder = "e.g. #FFFFFF", AutomationId = SwitchIds.ThumbColorEntry };
         thumbColorEntry.TextChanged += OnThumbColorChanged;
         layout.Add(PropertyPageHelpers.CreateEntryRow("Thumb Color", thumbColorEntry));
+
+        var commandParameterEntry = new Entry { Placeholder = "e.g. MyParameter", AutomationId = SwitchIds.CommandParameterEntry };
+        commandParameterEntry.TextChanged += OnCommandParameterChanged;
+        layout.Add(PropertyPageHelpers.CreateEntryRow("Command Parameter", commandParameterEntry));
     }
 
     void BuildViewPropertiesSection(VerticalStackLayout layout)
@@ -100,6 +104,9 @@ public class SwitchPropertiesPage : ContentPage
 
     void OnThumbColorChanged(object? sender, TextChangedEventArgs e)
         => _viewModel!.ThumbColor = PropertyHelperExtensions.ToSwitchColor(e.NewTextValue);
+
+    void OnCommandParameterChanged(object? sender, TextChangedEventArgs e)
+        => _viewModel!.CommandParameter = e.NewTextValue;
 
     void OnNavigateToViewPropertiesClicked(object? sender, EventArgs e)
         => Navigation.PushAsync(new BaseViewPropertiesPage(_viewModel!));

@@ -359,3 +359,194 @@ dotnet test UITests.<Platform>.csproj --filter "Name=SetIsToggled_ViaPropertiesP
 dotnet test UITests.<Platform>.csproj --filter "Category=Switch"
 dotnet test UITests.<Platform>.csproj --filter "Category=Switch"
 ```
+
+---
+
+## 10. Phase 5 — extended feature-matrix axes (`IsEnabled`, `FlowDirection`, `Toggle_Twice`)
+
+Addressed the open items deferred in §4.4 and §6, and the `IsEnabled` axis
+noted-but-not-added in §7 item 1, now that there's a concrete ask to widen
+the matrix rather than wait for a regression to motivate it.
+
+### New data providers
+
+| Provider | Values | Notes |
+|---|---|---|
+| `Data/EnabledStateData.cs` *(new)* | `true, false` | Unlike Opacity/Visibility, the two values assert genuinely different behavior shapes (state changes vs. state must not change) — reconciled in one data-driven test via an `if (!isEnabled)` branch, the same pattern `Toggle_RespondsCorrectly_AtGivenOpacity` already uses for its `opacity <= 0.0` special case. |
+| `Data/FlowDirectionData.cs` *(new)* | `"LeftToRight", "RightToLeft", "MatchParent"` | String values match `PropertyTypeResolver.ToFlowDirection`'s accepted input (the host app's Flow Direction entry), not the `FlowDirection` enum members directly. |
+
+### New feature-matrix tests
+
+| Test | Data | Verifies |
+|---|---|---|
+| `Toggle_RespondsCorrectly_AtGivenEnabledState(bool)` | `EnabledStateData.Values` | `IsEnabled` as a proper feature-matrix axis (data-driven), complementing the existing single-case functional test `Toggle_DoesNotChangeState_WhenDisabled`. Arrange-verifies `SwitchPage.IsEnabled` before asserting behavior, per §7.1's standing convention. |
+| `Toggle_StillWorks_AtGivenFlowDirection(string)` | `FlowDirectionData.Values` | `Toggle()` behaves identically regardless of layout mirroring (LTR/RTL/MatchParent) — a purely layout-affecting property shouldn't change interaction behavior. Arrange-verifies via the new `BaseViewPropertiesPage.FlowDirectionText` accessor. |
+| `Toggle_Twice_ReturnsToOriginalState_AtGivenOpacity(double)` | `OpacityData.Values`, `opacity <= 0.0` skipped via `Assert.Ignore` | §4.4's deferred case: symmetry between the existing `Toggle_Twice_ReturnsToOriginalState` functional test and the Opacity axis. `Opacity = 0` is excluded (not asserted "twice"), consistent with §7.2's finding that it blocks native hit-testing entirely — see `Toggle_RespondsCorrectly_AtGivenOpacity` for that case instead. |
+| `Toggle_Twice_ReturnsToOriginalState_WhenVisible()` | none (single case) | §4.4's deferred case for the Visibility axis. Only `isVisible = true` is meaningful — a hidden Switch can't be toggled at all, already covered by `Toggle_StillWorks_AtGivenVisibility(false)` — so this isn't data-driven. |
+
+### Supporting changes
+
+- `Pages/Base/BaseViewPropertiesPage.cs`: added `FlowDirectionText`
+  accessor, mirroring the existing `OpacityText` arrange-verification
+  accessor.
+- `[TearDown]` extended to also reset `FlowDirection` to `"LeftToRight"`
+  (the control's default), for the same defense-in-depth reason as every
+  other mutable property reset there (§7).
+
+### Verification
+
+Build-verified only in this sandboxed environment (`dotnet build
+UITests.Android.csproj`, 0 errors/warnings) and confirmed via
+`dotnet test --list-tests --filter "Category=Switch"` that all new
+data-driven cases are discovered with the expected parameter values. As
+with every prior phase, a real-device run (iOS simulator at minimum) is
+still required before considering this phase done — no simulator/device is
+attached in this sandbox.
+
+---
+
+## 11. Phase 6 — remaining `BaseViewPropertiesPage` axes (Alignment, Appearance, Advanced)
+
+Extends coverage to the rest of the directly-editable properties on the
+shared `Views/Base/BaseViewPropertiesPage.cs` (`HorizontalOptions`,
+`VerticalOptions`, `Background`, `ZIndex`), which were previously untested by
+this fixture (only `Opacity`/`IsVisible`/`IsEnabled`/`InputTransparent`/
+`FlowDirection` had coverage through Phase 5). The three properties reached
+only via sub-page navigation — `Shadow`/`Clip` (Advanced section buttons),
+`LayoutAndSize` (Width/Height/Margin), and `More Options` (Translation/
+Rotation/Scale/Anchor) — are **out of scope for this phase**: each needs its
+own Page Object for a page that doesn't have one yet, which is a larger
+change than extending the existing per-property test shape used here;
+revisit as a separate phase if needed.
+
+### New data providers
+
+| Provider | Values | Notes |
+|---|---|---|
+| `Data/LayoutOptionsData.cs` *(new)* | `"Start", "Center", "End", "Fill"` | Shared by both `HorizontalOptions` and `VerticalOptions` axes — both entries accept the same string set via `PropertyTypeResolver.ToLayoutOptions`. |
+| `Data/BackgroundColorData.cs` *(new)* | `"#FF0000", "#00FF00", "#0000FF"` | `#RRGGBB` format accepted by `PropertyTypeResolver.ToColor`. |
+| `Data/ZIndexData.cs` *(new)* | `-1, 0, 1, 100` | `ZIndex` only affects paint order among siblings, not hit-testing, for a control that's the sole child of its layout (true of every control-under-test page in this suite) — values chosen to cover negative/zero/positive without implying any behavior change is expected. |
+
+### New feature-matrix tests
+
+| Test | Data | Verifies |
+|---|---|---|
+| `Toggle_StillWorks_AtGivenHorizontalOptions(string)` | `LayoutOptionsData.Values` | `Toggle()` is unaffected by the control's horizontal alignment within its parent. |
+| `Toggle_StillWorks_AtGivenVerticalOptions(string)` | `LayoutOptionsData.Values` | Same shape, vertical axis. |
+| `Toggle_StillWorks_AtGivenBackground(string)` | `BackgroundColorData.Values` | `Toggle()` is unaffected by an appearance-only `Background` brush — unlike `Opacity`, there's no "value blocks hit-testing" analogue here, so one behavioral shape covers the whole axis. |
+| `Toggle_StillWorks_AtGivenZIndex(int)` | `ZIndexData.Values` | `Toggle()` is unaffected by paint-order changes at negative, zero, and positive values. |
+
+Each follows the established pattern (spec/TestPlan.md §7.1): set the
+property, arrange-verify the entry's text round-tripped before Apply,
+re-anchor `_switchPage`, then assert `Toggle()` still flips `IsToggled`.
+
+### Supporting changes
+
+- `Pages/Base/BaseViewPropertiesPage.cs`: added `HorizontalOptionsText`,
+  `VerticalOptionsText`, `BackgroundText`, and `ZIndexText` accessors,
+  mirroring the existing `OpacityText`/`FlowDirectionText` arrange-
+  verification accessors. `BackgroundText` only proves the entry accepted
+  the typed value, not that the color rendered — same caveat as the
+  existing `OnColorText`/`OffColorText`/`ThumbColorText` accessors on
+  `SwitchPropertiesPage`.
+- `[TearDown]` extended to also reset `HorizontalOptions`/`VerticalOptions`
+  to `"Fill"` (the `Switch`'s default, captured from `BaseViewModel`'s
+  constructor at `testView.HorizontalOptions`/`VerticalOptions`),
+  `Background` to `""` (clears the entry so the bound `Brush?` reverts to
+  `null`/`Brush.Default`), and `ZIndex` to `0`.
+
+### Verification
+
+Build-verified only in this sandboxed environment (`dotnet build
+UITests.Android.csproj`, 0 errors/warnings) and confirmed via
+`dotnet test --list-tests --filter "Category=Switch"` that all new
+data-driven cases are discovered with the expected parameter values. As
+with every prior phase, a real-device run (iOS simulator at minimum) is
+still required before considering this phase done — no simulator/device is
+attached in this sandbox.
+
+---
+
+## 12. Phase 7 — description label, and `Toggled` event / Command coverage
+
+Two gaps addressed: (1) `SwitchControlPage` had no on-screen description of
+what the page/control under test is for, and (2) there was no way to verify
+that `Switch`'s `Toggled` event fires, or that a `Command`/`CommandParameter`
+respond to interaction — `Microsoft.Maui.Controls.Switch` has no
+`Command`/`CommandParameter` of its own (unlike `Button`), so this required
+new host-app plumbing, not just new test code.
+
+### Host app changes
+
+- **`SwitchControlPage.cs`**: added a static description `Label`
+  (`SwitchIds.DescriptionLabel`) directly below `TestSwitch`, plus a small
+  diagnostics stack of four `Label`s bound (via `stringFormat: "{0}"`, to
+  reliably stringify non-`string` source types) to the new `SwitchViewModel`
+  members below. Also wires `TestSwitch.Toggled` to a new
+  `OnTestSwitchToggled` handler that (a) records the event firing and (b)
+  manually invokes `SwitchViewModel.ToggledCommand` with
+  `SwitchViewModel.CommandParameter` — this manual wiring **is** the
+  Command/CommandParameter support for this control, since there's no native
+  binding path for it on `Switch`.
+- **`SwitchViewModel.cs`** — new "Toggled event tracking" region:
+  - `ToggledEventCount` (`int`) / `LastToggledEventValue` (`bool?`) — proof
+    the native `Toggled` event fired and what value it reported.
+  - `ToggledCommand` (`ICommand`, a `Command<object?>`) / `CommandParameter`
+    (`string?`, settable from the Options page) / `CommandExecutionCount`
+    (`int`) / `LastCommandParameter` (`object?`) — proof the Command itself
+    executed (not just the event) and with what parameter.
+- **`SwitchPropertiesPage.cs`** (host "Options" page): added a "Command
+  Parameter" `Entry` (`SwitchIds.CommandParameterEntry`) so tests can set an
+  arbitrary parameter and assert it comes back on `LastCommandParameter`.
+- New automation IDs: `SwitchIds.DescriptionLabel`,
+  `ToggledEventCountLabel`, `LastToggledValueLabel`,
+  `CommandExecutionCountLabel`, `LastCommandParameterLabel`,
+  `CommandParameterEntry`.
+
+### New Page Object accessors
+
+- `SwitchPage.cs`: `Description`, `ToggledEventCount` (int, parsed),
+  `LastToggledValueText`, `CommandExecutionCount` (int, parsed),
+  `LastCommandParameterText`.
+- `SwitchPropertiesPage.cs`: `SetCommandParameter(string)`,
+  `CommandParameterText` (arrange verification, same pattern as
+  `OnColorText`/etc.).
+
+### New tests
+
+| Test | Verifies |
+|---|---|
+| `Toggle_FiresToggledEvent_AndIncrementsEventCount` | The native `Toggled` event fires exactly once per `Toggle()`. |
+| `Toggle_ToggledEvent_ReportsTheNewValue(bool)` | `ToggledEventArgs.Value` matches the Switch's actual new `IsToggled` state, starting from a known arrange-verified state so the expected value is deterministic rather than just "changed". |
+| `Toggle_ExecutesToggledCommand_AndIncrementsExecutionCount` | `ToggledCommand` itself executes once per `Toggled` event — asserted alongside the event count so a broken/unwired Command (event fires, count doesn't) would be caught, not just a broken event. |
+| `Toggle_ExecutesToggledCommand_WithExpectedParameter(string)` | `CommandParameter` set via the Options page round-trips through to `LastCommandParameter` after a toggle; covers a normal value and an empty-string edge case. |
+
+These are plain functional tests (not tagged `FeatureMatrix`), consistent
+with §7 decision 1's rationale for `Toggle_DoesNotChangeState_WhenDisabled`:
+`TestCase`s here vary the *value under test* directly rather than crossing
+`Toggle()` against an unrelated `View` property axis.
+
+### Independence / cleanup notes
+
+- `ToggledEventCount` and `CommandExecutionCount` are **cumulative counters
+  with no reset control in the host app** — `SwitchControlPage` is only
+  recreated on a fresh navigation (`NavigateFromHome`'s no-op re-use means
+  the same instance, and thus the same counts, persists across every test in
+  the fixture). Every test above therefore reads the count **before** acting
+  and asserts the **delta** (`+1`), never an absolute value — the same
+  pattern already used for `initialState` elsewhere in this fixture. This
+  keeps the tests order-independent without needing new host-app surface
+  just to reset counters.
+- `[TearDown]` extended to also reset `CommandParameter` to `""` (via
+  `SetCommandParameter("")`), for the same defense-in-depth reason as every
+  other mutable Switch-specific property reset there.
+
+### Verification
+
+Build-verified only in this sandboxed environment (`dotnet build
+TestSuite.csproj -f net10.0-android` and `dotnet build
+UITests.Android.csproj`, both 0 errors/warnings) and confirmed via
+`dotnet test --list-tests --filter "Category=Switch"` that all four new
+tests are discovered. As with every prior phase, a real-device run (iOS
+simulator at minimum) is still required before considering this phase
+done — no simulator/device is attached in this sandbox.

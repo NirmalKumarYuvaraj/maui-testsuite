@@ -34,6 +34,15 @@ public class SwitchPropertiesPage : BasePage
     public void SetThumbColor(string color) => SetEntry(SwitchIds.ThumbColorEntry, color);
 
     /// <summary>
+    /// Sets the parameter that will be passed to <c>SwitchViewModel.ToggledCommand</c>
+    /// the next time the Toggled event fires (see <see cref="UITests.Pages.Controls.SwitchPage.CommandExecutionCount"/>
+    /// and <see cref="UITests.Pages.Controls.SwitchPage.LastCommandParameterText"/>).
+    /// </summary>
+    public void SetCommandParameter(string value) => SetEntry(SwitchIds.CommandParameterEntry, value);
+
+    public string CommandParameterText => WaitForElement(SwitchIds.CommandParameterEntry).Text;
+
+    /// <summary>
     /// Current text in the On/Off/Thumb color entries. Exposed for arrange
     /// verification (spec/TestPlan.md §7.1) — confirm the field accepted the
     /// typed value before Apply, since there's no reliable cross-platform

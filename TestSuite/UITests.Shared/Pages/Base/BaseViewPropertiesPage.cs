@@ -64,6 +64,41 @@ public class BaseViewPropertiesPage : BasePage
     public string OpacityText => WaitForElement(BaseViewIds.OpacityEntry).Text;
 
     /// <summary>
+    /// Current text in the Flow Direction entry. Same arrange-verification
+    /// purpose as <see cref="OpacityText"/> — confirm <see cref="SetFlowDirection"/>
+    /// actually took before asserting behavior against it.
+    /// </summary>
+    public string FlowDirectionText => WaitForElement(BaseViewIds.FlowDirectionEntry).Text;
+
+    /// <summary>
+    /// Current text in the Horizontal Options entry. Same arrange-verification
+    /// purpose as <see cref="OpacityText"/>.
+    /// </summary>
+    public string HorizontalOptionsText => WaitForElement(BaseViewIds.HorizontalOptionsEntry).Text;
+
+    /// <summary>
+    /// Current text in the Vertical Options entry. Same arrange-verification
+    /// purpose as <see cref="OpacityText"/>.
+    /// </summary>
+    public string VerticalOptionsText => WaitForElement(BaseViewIds.VerticalOptionsEntry).Text;
+
+    /// <summary>
+    /// Current text in the Background entry. Same arrange-verification
+    /// purpose as <see cref="OpacityText"/> — note this only proves the
+    /// field accepted the typed value, not that the color was actually
+    /// rendered (there's no reliable cross-platform native attribute to read
+    /// a rendered <c>Brush</c> back from); a visual regression screenshot
+    /// comparison is what actually proves that (spec/TestPlan.md §7.1/§9).
+    /// </summary>
+    public string BackgroundText => WaitForElement(BaseViewIds.BackgroundEntry).Text;
+
+    /// <summary>
+    /// Current text in the ZIndex entry. Same arrange-verification purpose
+    /// as <see cref="OpacityText"/>.
+    /// </summary>
+    public string ZIndexText => WaitForElement(BaseViewIds.ZIndexEntry).Text;
+
+    /// <summary>
     /// Applies changes. The host app's "Apply" toolbar item calls
     /// <c>Navigation.PopToRootAsync()</c>, which returns to whichever
     /// control's <c>ControlPage</c> is the root of the current
@@ -77,7 +112,7 @@ public class BaseViewPropertiesPage : BasePage
     void SetEntry(string automationId, string value)
     {
         var entry = WaitForElement(automationId);
-        entry.Clear();
+        //entry.Clear();
         entry.SendKeys(value);
     }
 
